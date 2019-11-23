@@ -29,7 +29,7 @@
 </details>
 
 <details>
-<summary>Как записаться ан курс?</summary>
+<summary>Как записаться на курс?</summary>
 <p>
   
 * coming soon
