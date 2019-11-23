@@ -29,7 +29,7 @@
 </details>
 
 <details>
-<summary>Как записаться ан курс</summary>
+<summary>Как записаться ан курс?</summary>
 <p>
   
 * coming soon
@@ -38,7 +38,7 @@
 </details>
 
 <details>
-<summary>Как сдавать домашки</summary>
+<summary>Как сдавать домашки?</summary>
 <p> 
   
 * coming soon
