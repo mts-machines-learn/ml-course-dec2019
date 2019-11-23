@@ -32,8 +32,12 @@
 3. [Библиотеки для ML и DS](./3.%20%D0%9E%D1%81%D0%BD%D0%BE%D0%B2%D0%BD%D1%8B%D0%B5%20%D0%B1%D0%B8%D0%B1%D0%BB%D0%B8%D0%BE%D1%82%D0%B5%D0%BA%D0%B8/Lesson_3.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mts-machines-learn/ml-course-dec2019/blob/dev/3.%20%D0%9E%D1%81%D0%BD%D0%BE%D0%B2%D0%BD%D1%8B%D0%B5%20%D0%B1%D0%B8%D0%B1%D0%BB%D0%B8%D0%BE%D1%82%D0%B5%D0%BA%D0%B8/Lesson_3.ipynb)
 4. [Линейная регрессия](https://github.com/mts-machines-learn/ml-course-dec2019)
 
-## 3. Порядок прохождения
-
+<details>
+<summary><b>Как проходить курс</b></summary>
+<p>
+* Как сдавать домашки.
+</p>
+</details>
 
 
 
