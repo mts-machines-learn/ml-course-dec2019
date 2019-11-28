@@ -15,20 +15,34 @@ from ipywidgets import interact, IntSlider,  FloatSlider
         
 font = {'family': 'Verdana', 'weight': 'normal'}
 rc('font', **font)
+plt.rcParams.update({'font.size': 22})
+
+def visualize_X(X):
+    print(pd.DataFrame(X, columns=['Площадь квартиры']))
+    
+def visualize_y(y):
+    print(pd.DataFrame(y, columns=['Цена квартиры']))
+
 
 def get_data():
-    X = np.array([27,   34,    36,    42,    50,     51,     53,     66])
+    X = np.array([27,   34,    36,    42,    50,     51,     53,     66]) 
     y = np.array([5e6,  7.5e6, 5.5e6, 6.6e6, 10.5e6, 9.5e6,  9.9e6, 12e6])
+    return X, y
+
+def get_new_data1():
+    X = np.array([27,   34,    36,    42,    50,     51,     53,     66]) 
+    y = 5*X - 10
     return X, y
 
 
 def plot_data(X, y):
-    plt.xlabel("Площадь квартиры, квадратные метры")
-    plt.ylabel("Цена квартиры, млн рублей")
+    plt.figure(figsize=(10, 5))
+    plt.xlabel("Площадь квартиры,\nквадратные метры")
+    plt.ylabel("Цена квартиры,\nмлн рублей")
     plt.ylim([0, 15])
     plt.xlim([0, 80])
     plt.grid()
-    plt.scatter(X, y/1000000.0,  color='black', marker="+")   
+    plt.scatter(X, y/1000000.0,  color='black', marker="o", s=50)   
     plt.show()
 
 def print_table_with_data(X, y):
@@ -40,6 +54,7 @@ def print_table_with_data(X, y):
 def plot_data_and_hyp(X, y, k):    
         col = "black"
         length = len(X)
+        plt.figure(figsize=(10, 5))
         plt.plot(
                  np.linspace(0, 120, length), 
                  k*np.linspace(0, 120, length) / 1000000, 
@@ -49,9 +64,9 @@ def plot_data_and_hyp(X, y, k):
 
         plt.xlim([0, 80])
         plt.ylim([0, 15])
-        plt.xlabel("Площадь квартиры, квадратные метры")
-        plt.ylabel("Цена квартиры, млн рублей")
-        plt.scatter(X, y / 1000000,  color='black', marker="+")   
+        plt.xlabel("Площадь квартиры,\nквадратные метры")
+        plt.ylabel("Цена квартиры,\nмлн рублей")
+        plt.scatter(X, y / 1000000,  color='black', marker="o", s=50)  
         plt.grid()
         plt.legend(loc="upper left")    
         plt.show()    
@@ -74,6 +89,7 @@ def plot_data_and_error(X, y):
     def plot_data_and_hyp_with_error(k):    
         c = "black"
         length = len(X)
+        plt.figure(figsize=(10, 5))
         plt.plot(np.linspace(0, 120, len(X)), k*np.linspace(0, 120, len(X)) / 1000000, color=c, label="k={0}".format(k))
     
         for x_i, y_i in zip(X, y):
@@ -83,7 +99,7 @@ def plot_data_and_error(X, y):
         plt.ylim([0, 15])
         plt.xlabel("Площадь квартиры, квадратные метры")
         plt.ylabel("Цена квартиры, млн рублей")
-        plt.scatter(X, y / 1000000,  color='black', marker="+")   
+        plt.scatter(X, y / 1000000,  color='black', marker="o", s=50)   
         plt.grid()
         plt.legend(loc="upper left")    
         plt.show()
@@ -102,7 +118,7 @@ def plot_data_and_J(X, y):
     
         c = 'black'
         
-        axis[0].plot(np.linspace(0, 120, len(X)), k*np.linspace(0, 120, len(X)) / 1000000, color=c, label="k={0}".format(k))
+        axis[0].plot(np.linspace(0, 120, len(X)), k*np.linspace(0, 120, len(X)) / 1000000, color=c)
     
         for x_i, y_i in zip(X, y):
             plt.plot([x_i, x_i], [x_i * k / 1000000, y_i / 1000000], color='red')
@@ -111,7 +127,10 @@ def plot_data_and_J(X, y):
         axis[0].plot(np.linspace(0, 120, len(X)),  k*np.linspace(0, 120, len(X)) / 1000000, 
                      label="k={0}".format(k), color=c
                     )
-        axis[0].scatter(X, y / 1000000,  color='black', marker="+")
+        axis[0].set_title("Полученая линейная функция")
+        for x_i, y_i in zip(X, y):
+            axis[0].plot([x_i, x_i], [x_i * k / 1000000, y_i / 1000000], color='red')
+        axis[0].scatter(X, y / 1000000,  color='black', marker="o", s=50)  
         axis[0].set_xlabel("Дальность квартиры от метро, метры")
         axis[0].set_ylabel("Цена квартиры, млн рублей")
         axis[0].set_xlim([0, 80])
@@ -119,22 +138,29 @@ def plot_data_and_J(X, y):
         axis[0].legend()    
         axis[0].grid()
 
-        axis[1].set_title("Значение ошибки для каждой гипотезы")
-        axis[1].set_ylabel("Значение средней квадратичной ошибки")
-        axis[1].set_xlabel("Значение коэфициента")
-        axis[1].scatter(k, J(k, X, y),  marker="o", label="k={0}".format(k), color=c)
+        axis[1].set_title("Значение ошибки\nдля гипотезы", fontsize=24)
+        axis[1].set_ylabel("Значение функции потерь", fontsize=20)
+        axis[1].set_xlabel("Значение коэффициента $k$")
+        axis[1].scatter(k, J(k, X, y),  marker="+", label="k={0}".format(k), s=50, color=c)
         axis[1].set_xlim([140000, 230000])
         axis[1].set_ylim([0, 2e+12])
         axis[1].legend()    
+       
+
+        # We change the fontsize of minor ticks label 
+        axis[1].tick_params(axis='both', which='major', labelsize=20)
+        axis[1].tick_params(axis='both', which='minor', labelsize=20)
         axis[1].grid()
         plt.show()   
     
 def plot_all_J(X, y):
+    plt.figure(figsize=(10, 5))
     plt.title("Значение ошибки")
-    plt.ylabel("Значение средней квадратичной ошибки")
-    plt.xlabel("Значение коэфициента")
+    plt.ylabel("Значение функции потерь")
+    plt.xlabel("Значение коэффициента $k$")
     k = np.linspace(175000, 196000, 100)
-    plt.scatter(k, [J(tmp_k, X, y) for tmp_k in k], color='black', marker="+")
+    plt.plot(k, [J(tmp_k, X, y) for tmp_k in k], color='black')
+    #plt.scatter(k, [J(tmp_k, X, y) for tmp_k in k], color='black', marker="+", s=50)
     plt.show()  
     
    
@@ -164,11 +190,12 @@ def lin_grad(X, y, k_init, alpha, iters=20):
     return k
     
 def lin_grad_trace(X, y, k_init, alpha, iters=20):
+    plt.figure(figsize=(10, 5))
     plt.title("Значение ошибки")
-    plt.ylabel("Значение средней квадратичной ошибки")
+    plt.ylabel("Значение функции потерь")
     plt.xlabel("Значение коэфициента")
-    T = np.linspace(175000, 196000, 100)
-    plt.scatter(T, [J(t, X, y) for t in T], color='black', marker="+")
+    T = np.linspace(170000, 200000, 100)
+    plt.plot(T, [J(t, X, y) for t in T], color='black')
     plt.scatter(k_init, J(k_init, X, y), color='Yellow', marker="o")
     k = k_init
     for i in range(iters):
@@ -178,23 +205,29 @@ def lin_grad_trace(X, y, k_init, alpha, iters=20):
         plt.plot([tmp_k, k], [J(tmp_k, X, y), J(k, X, y)], color='black', linestyle='dashed')
         plt.scatter(k, J(k, X, y), color='blue', marker="o")
     plt.scatter(k, J(k, X, y), color='red', marker="o")
-    
+    plt.ylim([0.7*10e11, 1.1*10e11])
+    plt.xlim([171000, 199000])
     plt.show()    
     return k
 
 def plot_all_J_with_der(X, y):
+    plt.figure(figsize=(10, 5))
     plt.title("Значение ошибки")
-    plt.ylabel("Значение средней квадратичной ошибки")
+    plt.ylabel("Значение функции потерь")
     plt.xlabel("Значение коэфициента")
     k = np.linspace(175000, 196000, 100)
-    plt.scatter(k, [J(tmp_k, X, y) for tmp_k in k], color='black', marker="+")
+    plt.plot(k, [J(tmp_k, X, y) for tmp_k in k], color='black')
     
     t = [180000, 190000]
-    plt.scatter(t, [J(tmp_k, X, y) for tmp_k in t], color='blue', marker="o")
+    plt.scatter(t[0], J(t[0], X, y), color='blue', marker="o")
     
-    plt.plot([187500, 192500], [3.58296875*1e11 ,4.07478125*1e11], label="Касательная в точке 180000")
-    plt.plot([177500, 182500], [4.2024375*1e11, 3.6185625*1e11], label="Касательная в точке 190000")
+    plt.scatter(t[1], J(t[1], X, y), color='orange', marker="o")
     
+    
+    plt.plot([150000, 196000], [0-15000000000, 0.887*10e11], label="Касательная в точке 190000", color='orange')
+    plt.plot([175000, 184000], [0.899*10e11, 0.7*10e11], label="Касательная в точке 180000", color='blue')
+    plt.xlim([175000, 196000])
+    plt.ylim([0.7*10e11, 0.9*10e11])
     plt.legend()
     plt.show()  
     
@@ -434,4 +467,77 @@ def plot_poly_data(X, y, X1=None, y1=None):
         plt.show()
     
 
-   
+def plot_linear_loss_in_3d(X, y):    
+    angles1 = IntSlider(min=0, max=180, step=1, value=0, description='Вертикальное')
+    angles2 = IntSlider(min=0, max=180, step=1, value=45, description='Горизонтальное')
+
+    @interact(angle1=angles1, angle2=angles2)
+    def plot_loss(angle1, angle2):
+        fig = plt.figure(figsize=(15, 10))
+        ax = fig.gca(projection='3d')
+
+        # Make data.
+        ks = np.linspace(0, 200000, 20)
+        bs = np.linspace(-20000000, 20000000, 20)
+        ks, bs = np.meshgrid(ks, bs)
+
+        Z = np.zeros_like(ks)
+        for i in range(len(ks)):
+            for j in range(len(bs)):
+                Z[i, j] = linearn_loss_function(ks[i, j], bs[i, j], X, y)
+
+        ax.set_xlabel('Значение параметра $k$')
+        ax.set_ylabel('Значение параметра $b$')
+        ax.set_zlabel('Функция ошибки')
+        
+        surf = ax.plot_surface(ks, bs, Z,   linewidth=0, antialiased=False, cmap=cm.coolwarm)
+        ax.view_init(angle1, angle2)
+        plt.show()
+        
+        
+
+def lin_grad_linear(X, y, alpha, iters=20, k_init=0, b_init=0):    
+    angles1 = IntSlider(min=0, max=90, step=1, value=0, description='Вертикальное')
+    angles2 = IntSlider(min=0, max=180, step=1, value=0, description='Горизонтальное')
+    
+    k = None
+    b = None
+    
+    ks = np.linspace(0, 500000, 20)
+    bs = np.linspace(-200, 200, 20)
+    ks, bs = np.meshgrid(ks, bs)
+    Z = np.zeros_like(ks)
+    for i in range(len(ks)):
+        for j in range(len(ks)):
+            Z[i, j] = linearn_loss_function(ks[i, j], bs[i, j], X, y)
+    
+    k = k_init
+    b = b_init
+    
+    all_k = [k]
+    all_b = [b]
+    Js = [linearn_loss_function(k, b, X, y)]
+    
+    for i in range(iters):
+        y_h = k*X + b -   y 
+        k = k - alpha * 2*sum(y_h * X) / len(X)
+        b = b - alpha * 2*sum(y_h) / len(X)
+        all_k.append(k)
+        all_b.append(b)
+        Js.append(linearn_loss_function(k, b, X, y))
+    
+    @interact(angle1=angles1, angle2=angles2)    
+    def plot_trace(angle1, angle2):
+        fig = plt.figure(figsize=(15, 10))
+        ax = fig.gca(projection='3d')
+
+        ax.set_xlabel('Значение коэффициента $k$')
+        ax.set_ylabel('Значение коэффициента $b$')
+        ax.set_zlabel('Функция ошибка')
+        surf = ax.plot_wireframe(ks, bs, Z,  cmap=cm.coolwarm)
+
+        ax.scatter(all_k[0], all_b[0], Js[0], c="yellow")
+        ax.scatter(all_k[1:-1], all_b[1:-1], Js[1:-1], c="blue")
+        ax.scatter(all_k[-1], all_b[-1], Js[-1], c="Red")
+        ax.view_init(angle1, angle2)
+        plt.show()
