@@ -17,133 +17,117 @@ font = {'family': 'Verdana', 'weight': 'normal'}
 rc('font', **font)
 plt.rcParams.update({'font.size': 22})
 
-def visualize_X(X):
-    print(pd.DataFrame(X, columns=['Площадь квартиры']))
     
-def visualize_y(y):
-    print(pd.DataFrame(y, columns=['Цена квартиры']))
+X_LIM = 0.6
+Y_LIM = 0.6
 
+
+seed = 6942069
+np.random.seed(seed)
 
 def get_data():
-    X = np.array([27,   34,    36,    42,    50,     51,     53,     66]) 
-    y = np.array([5e6,  7.5e6, 5.5e6, 6.6e6, 10.5e6, 9.5e6,  9.9e6, 12e6])
+    
+    X = np.random.randint(10, 50, size=(20, )) / 100
+    X.sort()
+    
+    k = 0.5 
+    b = .1
+
+    y = np.round(k*X + b + .045*np.random.normal(size=X.shape), 2)
+    
     return X, y
 
-def get_new_data1():
-    X = np.array([27,   34,    36,    42,    50,     51,     53,     66]) 
-    y = 5*X - 10
-    return X, y
+
+def create_base_plot():
+    plt.figure(figsize=(10, 5), dpi=300)
+    plt.xlabel("Площадь квартиры,\nквадратные метры")
+    plt.ylabel("Цена квартиры,\nмлн рублей")
+    plt.ylim([0, X_LIM])
+    plt.xlim([0, Y_LIM])
+    plt.grid()
 
 
 def plot_data(X, y):
-    plt.figure(figsize=(10, 5))
-    plt.xlabel("Площадь квартиры,\nквадратные метры")
-    plt.ylabel("Цена квартиры,\nмлн рублей")
-    plt.ylim([0, 15])
-    plt.xlim([0, 80])
-    plt.grid()
-    plt.scatter(X, y/1000000.0,  color='black', marker="o", s=50)   
+    create_base_plot()
+    plt.scatter(X, y,  color='black', marker="o", s=50)   
     plt.show()
 
-def print_table_with_data(X, y):
-    d = {"Площадь квартиры" : pd.Series(X, index=range(0, 8)), 'Цена квартиры' : pd.Series(y,index=range(0, 8))}
-    df = pd.DataFrame(d)
-    print(df)
     
-
+def visualize_X(X):
+    print(pd.DataFrame(X, columns=['Площадь квартиры, кв. метры']))
+    
+    
+def visualize_y(y):
+    print(pd.DataFrame(y, columns=['Цена квартиры, млн. руб.']))
+    
+    
 def plot_data_and_hyp(X, y, k):    
-        col = "black"
-        length = len(X)
-        plt.figure(figsize=(10, 5))
-        plt.plot(
-                 np.linspace(0, 120, length), 
-                 k*np.linspace(0, 120, length) / 1000000, 
-                 label="k={0}".format(k), 
-                 color=col
-                )
+    create_base_plot()
+    length = len(X)
+    plt.plot(np.linspace(0, 1, length), k*np.linspace(0, 1, length), label="k={0}".format(k), color='black')   
+    plt.scatter(X, y,  color='black', marker="o", s=50)  
+    plt.legend(loc="upper left")   
+    plt.show()
 
-        plt.xlim([0, 80])
-        plt.ylim([0, 15])
-        plt.xlabel("Площадь квартиры,\nквадратные метры")
-        plt.ylabel("Цена квартиры,\nмлн рублей")
-        plt.scatter(X, y / 1000000,  color='black', marker="o", s=50)  
-        plt.grid()
-        plt.legend(loc="upper left")    
-        plt.show()    
     
 def choose_slope(X, y):
-    k_slider = IntSlider(min=150000, max=220000, step=2000, value=170000)
+    k_slider = FloatSlider(min=0, max=2, step=0.1, value=0.1)
 
     @interact(k=k_slider)
     def interact_plot_data_and_hyp(k):
         plot_data_and_hyp(X, y, k)
     
-    
 
 def plot_data_and_error(X, y):
-    k_slider = IntSlider(min=150000, max=220000, step=2000, value=170000)
-    
-    #X, y =  get_data()
+    k_slider = FloatSlider(min=0, max=2, step=0.1, value=0.1)
 
     @interact(k=k_slider)
     def plot_data_and_hyp_with_error(k):    
-        c = "black"
+        create_base_plot()
         length = len(X)
-        plt.figure(figsize=(10, 5))
-        plt.plot(np.linspace(0, 120, len(X)), k*np.linspace(0, 120, len(X)) / 1000000, color=c, label="k={0}".format(k))
+        plt.plot(np.linspace(0, 1, length), k*np.linspace(0, 1, length), label="k={0}".format(k), color='black')   
+        plt.scatter(X, y,  color='black', marker="o", s=50)  
+        plt.legend(loc="upper left") 
     
         for x_i, y_i in zip(X, y):
-            plt.plot([x_i, x_i], [x_i * k / 1000000, y_i / 1000000], color='red')
-
-        plt.xlim([0, 80])
-        plt.ylim([0, 15])
-        plt.xlabel("Площадь квартиры, квадратные метры")
-        plt.ylabel("Цена квартиры, млн рублей")
-        plt.scatter(X, y / 1000000,  color='black', marker="o", s=50)   
-        plt.grid()
-        plt.legend(loc="upper left")    
+            plt.plot([x_i, x_i], [x_i * k, y_i], color='red')
+            
+        plt.scatter(X, y,  color='black', marker="o", s=50)  
         plt.show()
         
         
 def J(k, X, y):
-    return sum((y - k*X)**2) / (len(y))
+    return np.mean((y - k*X)**2)
 
 
 def plot_data_and_J(X, y):
-    k_slider = IntSlider(min=150000, max=220000, step=2000, value=170000)
+    k_slider = FloatSlider(min=0, max=2, step=0.1, value=0.1)
 
     @interact(k=k_slider)
     def plot_data_and_hyp_with_error(k):    
         fig, axis = plt.subplots(1, 2, figsize=(18, 6))
     
         c = 'black'
+        length = len(X)
         
-        axis[0].plot(np.linspace(0, 120, len(X)), k*np.linspace(0, 120, len(X)) / 1000000, color=c)
-    
-        for x_i, y_i in zip(X, y):
-            plt.plot([x_i, x_i], [x_i * k / 1000000, y_i / 1000000], color='red')
-        
-
-        axis[0].plot(np.linspace(0, 120, len(X)),  k*np.linspace(0, 120, len(X)) / 1000000, 
-                     label="k={0}".format(k), color=c
-                    )
+        axis[0].plot(np.linspace(0, 0.6, length),  k*np.linspace(0, 0.6, length), label="k={0}".format(k), color=c)
         axis[0].set_title("Полученая линейная функция")
         for x_i, y_i in zip(X, y):
-            axis[0].plot([x_i, x_i], [x_i * k / 1000000, y_i / 1000000], color='red')
-        axis[0].scatter(X, y / 1000000,  color='black', marker="o", s=50)  
+            axis[0].plot([x_i, x_i], [x_i * k, y_i], color='red')
+        axis[0].scatter(X, y,  color='black', marker="o", s=50)  
         axis[0].set_xlabel("Дальность квартиры от метро, метры")
         axis[0].set_ylabel("Цена квартиры, млн рублей")
-        axis[0].set_xlim([0, 80])
-        axis[0].set_ylim([0, 15])
+        axis[0].set_xlim(0, X_LIM)
+        axis[0].set_ylim(0, Y_LIM)
         axis[0].legend()    
         axis[0].grid()
 
         axis[1].set_title("Значение ошибки\nдля гипотезы", fontsize=24)
         axis[1].set_ylabel("Значение функции потерь", fontsize=20)
         axis[1].set_xlabel("Значение коэффициента $k$")
-        axis[1].scatter(k, J(k, X, y),  marker="+", label="k={0}".format(k), s=50, color=c)
-        axis[1].set_xlim([140000, 230000])
-        axis[1].set_ylim([0, 2e+12])
+        axis[1].scatter(k, J(k, X, y),  marker="+", label="J={0}".format( round(J(k, X, y), 3)), s=50, color=c)
+        axis[1].set_xlim([-1, 3])
+        axis[1].set_ylim([0, 0.15])
         axis[1].legend()    
        
 
@@ -153,21 +137,25 @@ def plot_data_and_J(X, y):
         axis[1].grid()
         plt.show()   
     
+    
 def plot_all_J(X, y):
-    plt.figure(figsize=(10, 5))
+    plt.figure(figsize=(8, 5))
     plt.title("Значение ошибки")
     plt.ylabel("Значение функции потерь")
     plt.xlabel("Значение коэффициента $k$")
-    k = np.linspace(175000, 196000, 100)
+    k = np.linspace(-1, 2.65, 100)
     plt.plot(k, [J(tmp_k, X, y) for tmp_k in k], color='black')
-    #plt.scatter(k, [J(tmp_k, X, y) for tmp_k in k], color='black', marker="+", s=50)
-    plt.show()  
+    plt.grid()
+    plt.show()
+
+
+
     
-   
-  
-def der_J(X, y, k):
-    N = len(X)
-    return sum((k*X - y)*X)/N
+    
+    
+    
+    
+
 
 
 
@@ -210,26 +198,7 @@ def lin_grad_trace(X, y, k_init, alpha, iters=20):
     plt.show()    
     return k
 
-def plot_all_J_with_der(X, y):
-    plt.figure(figsize=(10, 5))
-    plt.title("Значение ошибки")
-    plt.ylabel("Значение функции потерь")
-    plt.xlabel("Значение коэфициента")
-    k = np.linspace(175000, 196000, 100)
-    plt.plot(k, [J(tmp_k, X, y) for tmp_k in k], color='black')
-    
-    t = [180000, 190000]
-    plt.scatter(t[0], J(t[0], X, y), color='blue', marker="o")
-    
-    plt.scatter(t[1], J(t[1], X, y), color='orange', marker="o")
-    
-    
-    plt.plot([150000, 196000], [0-15000000000, 0.887*10e11], label="Касательная в точке 190000", color='orange')
-    plt.plot([175000, 184000], [0.899*10e11, 0.7*10e11], label="Касательная в точке 180000", color='blue')
-    plt.xlim([175000, 196000])
-    plt.ylim([0.7*10e11, 0.9*10e11])
-    plt.legend()
-    plt.show()  
+
     
     
     
@@ -254,6 +223,15 @@ def get_new_data():
         12400000.,   7500000.,  13000000.,  12200000.,  16000000.,
          3500000.,  10300000.,   9300000.,   8000000.,  11400000.]) 
     return X1, X2, y
+
+def linearn_loss_function(k, b, X, y):
+    
+    N = X.shape[0]       # получаем размер вектора столбца
+    # или N = len(X)
+   
+    J = np.sum(((k*X + b) - y)**2)/N
+    # или J = np.mean((k*X - y)**2)/N
+    return J
 
 
 def print_3d_table_with_data(X1, X2, y):
