@@ -29,7 +29,7 @@ def get_data():
     y = np.array([5e6,  7.5e6, 5.5e6, 6.6e6, 10.5e6, 9.5e6,  9.9e6, 12e6])
     return X, y
 
-def get_new_data1():
+def data_from_normalization():
     X = np.array([27,   34,    36,    42,    50,     51,     53,     66]) 
     y = 5*X - 10
     return X, y
