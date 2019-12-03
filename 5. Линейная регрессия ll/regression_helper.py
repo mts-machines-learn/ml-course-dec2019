@@ -159,12 +159,95 @@ def plot_all_J(X, y):
     plt.ylabel("Значение функции потерь")
     plt.xlabel("Значение коэффициента $k$")
     k = np.linspace(175000, 196000, 100)
-    plt.plot(k, [J(tmp_k, X, y) for tmp_k in k], color='black')
+    plt.plot(k, [J(tmp_k, X, y) for tmp_k in k], color='black', marker='o')
     #plt.scatter(k, [J(tmp_k, X, y) for tmp_k in k], color='black', marker="+", s=50)
     plt.show()  
     
-   
-  
+
+def derivation(x0):
+    d_slider = FloatSlider(min=-1, max=1.5, step=0.1, value=1.5, description='$\Delta x$')
+
+    def f(x):
+        return x**2 + 1.5
+
+    def der_f(x):
+        return 2*x
+
+
+    @interact(dx=d_slider)
+    def interact_plot_data_and_hyp(dx):
+        fig, ax = plt.subplots(figsize=(10, 5), dpi=300)
+
+        plt.ylim([-1, 11])
+        plt.xlim([-4, 4])
+        plt.grid()
+        length = 100
+        x = np.linspace(-3.5, 3.5, length)
+
+
+
+        x1 = x0+dx
+        y0 = f(x0)
+        y1 = f(x1)
+
+        begin = -11
+        end = 11
+
+        if x1 != x0:
+            k = (y1-y0)/(x1-x0)
+            b = y0 - k*x0
+
+            plt.text( -b/k, -1, "$\\alpha$", ha='left', va='bottom')
+            plt.text(-4, -1, "$tg( \\alpha ) = \dfrac{\Delta y}{\Delta x} = $" + "{0:.2}".format( (y1-y0)/(dx) ), 
+                     ha='left', va='bottom')
+
+            plt.plot([begin, end], [k*begin + b, k*end + b], color='black', linestyle='dashed')
+
+            if x1 - x0 > 0.3:
+                plt.text( x0 + (x1 - x0)/2, y0, "$\Delta x$", ha='center', va='top')
+                plt.text( x1, y0 + (y1 - y0)/2, "$\Delta y$", ha='left', va='center')
+                elif x0 - x1 > 0.3:
+                    plt.text( x0 + (x1 - x0)/2, y0, "$\Delta x$", ha='center', va='bottom')
+                    plt.text( x1, y0 + (y1 - y0)/2, "$\Delta y$", ha='right', va='center')                           
+                    else:
+                        plt.plot([begin, end], [der_f(x0)*(begin-x0) + f(x0), der_f(x0)*(end-x0) + f(x0)], 
+                                 color='black', linestyle='dashed')
+
+                        plt.text((der_f(x0)*x0 - f(x0) )/ der_f(x0), -1, "$\\alpha$", ha='left', va='bottom')
+                        plt.text(-4, -1, "$tg( \\alpha ) = \dfrac{\Delta y}{\Delta x} = $" + "{0:.2}".format( der_f(x0) ), 
+                                 ha='left', va='bottom')
+
+
+                        if x1 >= x0:
+                            plt.text(-4, y1+0.1, "$f(x_0 + \Delta x)$", ha='left', va='bottom', fontsize=20)
+                            plt.text(x1+0.1, -1, "$x_0 + \Delta x$", ha='left', va='bottom', fontsize=20)
+                            elif -dx > 0.5:
+                                plt.text(-4, y1+0.1, "$f(x_0 + \Delta x)$", ha='left', va='top', fontsize=20)
+                                plt.text(x1+0.1, 0, "$x_0 + \Delta x$", ha='left', va='bottom', fontsize=20)
+
+                                plt.plot(x, f(x), color='black')   
+
+                                plt.plot([-5, x1], [y1, y1], color='black', linestyle='dotted')
+                                plt.plot([-5, x0], [y0, y0], color='black', linestyle='dotted')
+                                plt.plot([x0, x0], [-5, y0], color='black', linestyle='dotted')
+                                plt.plot([x1, x1], [-5, y1], color='black', linestyle='dotted')
+
+                                plt.text(-4, y0-0.1, "$f(x_0)$", ha='left', va='top')
+                                plt.text(x0-0.1, -1, "$x_0$", ha='right', va='bottom')
+
+                                plt.scatter([x0, x1], [y0, y1], color='black', marker="o", s=50) 
+
+                                plt.plot([x0, x1], [y0, y0], color='black', linestyle='dashed')
+                                plt.plot([x1, x1], [y0, y1], color='black', linestyle='dashed')
+
+                                plt.show()
+        
+        
+    
+    
+    
+    
+    
 def der_J(X, y, k):
     N = len(X)
     return sum((k*X - y)*X)/N

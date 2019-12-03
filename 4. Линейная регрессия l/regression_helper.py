@@ -9,7 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from ipywidgets import interact, IntSlider,  FloatSlider
-       
+import math
 
         
         
@@ -149,11 +149,141 @@ def plot_all_J(X, y):
     plt.show()
 
 
+def derivation(x0):
+    d_slider = FloatSlider(min=-1, max=1.5, step=0.1, value=1.5, description='$\Delta x$')
+
+    def f(x):
+        return x**2 + 1.5
+
+    def der_f(x):
+        return 2*x
+
+
+    @interact(dx=d_slider)
+    def interact_plot_data_and_hyp(dx):
+        fig, ax = plt.subplots(figsize=(10, 5), dpi=300)
+
+        plt.ylim([-1, 11])
+        plt.xlim([-4, 4])
+        plt.grid()
+        length = 100
+        x = np.linspace(-3.5, 3.5, length)
+        
+        tg_alingment = 'left' if x0 > 0 else 'right'
+        tg_position = -4 if x0 > 0 else 4
+
+        x1 = x0+dx
+        y0 = f(x0)
+        y1 = f(x1)
+
+        begin = -11
+        end = 11
+        
+        
+        tg_value = (y1-y0)/(dx) if dx != 0 else der_f(x0)
+        tg_text = "$tg( \\alpha ) = \dfrac{\Delta y}{\Delta x} = $" + "{0:.2}".format(tg_value) if x0 != 0 else \
+        "$tg( \\alpha ) = $" + "{0:.2}".format(float(tg_value))
+
+        if x1 != x0:
+            k = (y1-y0)/(x1-x0)
+            b = y0 - k*x0
+            if x0 != 0:
+                plt.text( -b/k, -1, "$\\alpha$", ha='left', va='bottom')
+            plt.plot([begin, end], [k*begin + b, k*end + b], color='black', linestyle='dashed')
+            
+            vpos = 'top' if y1 > y0 else 'bottom'
+            hpos = 'left' if x1 > x0 else 'right'
+            if abs(x1 - x0) > 1.5 or abs(y1 - y0) > 1.5:
+                plt.text( x0 + (x1 - x0)/2, y0, "$\Delta x$", ha='center', va=vpos)
+                plt.text( x1, y0 + (y1 - y0)/2, "$\Delta y$", ha=hpos, va='center')
+        else:
+            plt.plot([begin, end], [der_f(x0)*(begin-x0) + f(x0), der_f(x0)*(end-x0) + f(x0)], 
+                     color='black', linestyle='dashed')
+            if x0 != 0:
+                plt.text((der_f(x0)*x0 - f(x0) )/ der_f(x0), -1, "$\\alpha$", ha='left', va='bottom')
+        
+      
+        if x1 >= x0:
+            plt.text(x1+0.1, -1, "$x_0 + \Delta x$", ha='left', va='bottom', fontsize=19)
+        else:
+            plt.text(x1+0.1, 0, "$x_0 + \Delta x$", ha='left', va='bottom', fontsize=19)
+            
+        if abs(y1-y0) < 0.7:
+            plt.text(-3.2, y1+0.1, "$f(x_0 + \Delta x)$", ha='left', va='top', fontsize=19)
+        else:
+            plt.text(-4, y1+0.1, "$f(x_0 + \Delta x)$", ha='left', va='top', fontsize=19)
+            
+        
+        plt.text(tg_position, -1, tg_text, 
+                     ha=tg_alingment, va='bottom')
+
+        plt.plot(x, f(x), color='black')   
+
+        plt.plot([-5, x0], [y0, y0], color='red', linestyle='dotted')
+        plt.plot([-5, x1], [y1, y1], color='blue', linestyle='dotted')
+        plt.plot([x0, x0], [-5, y0], color='red', linestyle='dotted')
+        plt.plot([x1, x1], [-5, y0], color='blue', linestyle='dotted')
+
+        plt.text(-4, y0-0.1, "$f(x_0)$", ha='left', va='top')
+        plt.text(x0-0.1, -1, "$x_0$", ha='right', va='bottom')
+
+        plt.scatter([x0, x1], [y0, y1], color='black', marker="o", s=50) 
+
+        plt.plot([x0, x1], [y0, y0], color='black', linestyle='dashed')
+        plt.plot([x1, x1], [y0, y1], color='black', linestyle='dashed')
+
+        plt.show()
 
     
+def plot_func_and_der(same=True):
+    x_slider = FloatSlider(min=-2, max=2, step=0.1, value=2, description='$x$')
     
+    def f(x):
+        return x**2 + 1.5
     
+    def der_f(x):
+        return 2*x
+
+    @interact(x0=x_slider)
+    def plot_data_and_hyp_with_error(x0):    
+        fig, axis = plt.subplots(1, 2, figsize=(18, 6), dpi=300)
     
+        for ax in axis:
+            ax.set_xlim(-4, 4)
+            ax.grid()
+            
+        if same:
+            axis[0].set_ylim(-11, 11)
+        else:
+            axis[0].set_ylim(0, 11)
+        axis[1].set_ylim(-11, 11)
+            
+        length = 1000
+        x = np.linspace(-12, 12, length)
+        
+        axis[0].plot(x, f(x), color='black')
+        axis[1].plot(x, der_f(x), color='black')
+        
+        axis[0].scatter(x0, f(x0), color='black')
+        axis[1].scatter(x0, der_f(x0), color='black')
+        
+        axis[0].set_title("$f(x) = x^2 + 1.5$")
+        axis[1].set_title("$f'(x) = 2x$")
+        
+        axis[0].text(-4, -11 if same else 0, f"f({x0}) = {f(x0):.2}", ha='left', va='bottom')
+        axis[1].text(4, -11, f"f'({x0}) = {der_f(x0):.2}", ha='right', va='bottom')
+        
+        begin = -10
+        end = 20
+        if x0 != 0:
+            axis[0].plot([begin, end], [der_f(x0)*(begin-x0) + f(x0), der_f(x0)*(end-x0) + f(x0)], 
+                     color='black', linestyle='dashed')
+        else:
+            axis[0].plot([begin, end], [f(0), f(0)], 
+                     color='black', linestyle='dashed')
+    
+
+        plt.show() 
     
 
 
