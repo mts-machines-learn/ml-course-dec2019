@@ -15,7 +15,7 @@ import math
         
 font = {'family': 'Verdana', 'weight': 'normal'}
 rc('font', **font)
-plt.rcParams.update({'font.size': 22})
+
 
     
 X_LIM = 0.6
@@ -39,9 +39,10 @@ def get_data():
 
 
 def create_base_plot():
+    plt.rcParams.update({'font.size': 22})
     plt.figure(figsize=(10, 5), dpi=300)
-    plt.xlabel("Площадь квартиры,\nквадратные метры")
-    plt.ylabel("Цена квартиры,\nмлн рублей")
+    plt.xlabel("Площадь квартиры,\nквадратные метры", fontsize=22)
+    plt.ylabel("Цена квартиры,\nмлн рублей", fontsize=22)
     plt.ylim([0, X_LIM])
     plt.xlim([0, Y_LIM])
     plt.grid()
@@ -101,6 +102,9 @@ def J(k, X, y):
 
 
 def plot_data_and_J(X, y):
+    plt.rcParams.update({'font.size': 20})
+    
+    
     k_slider = FloatSlider(min=0, max=2, step=0.1, value=0.1)
 
     @interact(k=k_slider)
@@ -139,8 +143,9 @@ def plot_data_and_J(X, y):
     
     
 def plot_all_J(X, y):
+    plt.rcParams.update({'font.size': 22})
     plt.figure(figsize=(8, 5))
-    plt.title("Значение ошибки")
+    plt.title("Функция ошибки")
     plt.ylabel("Значение функции потерь")
     plt.xlabel("Значение коэффициента $k$")
     k = np.linspace(-1, 2.65, 100)
@@ -234,16 +239,10 @@ def derivation(x0):
 
         plt.show()
 
-    
-def plot_func_and_der(same=True):
+        
+def plot_func_and_der(f, der_f, same=True):
     x_slider = FloatSlider(min=-2, max=2, step=0.1, value=2, description='$x$')
     
-    def f(x):
-        return x**2 + 1.5
-    
-    def der_f(x):
-        return 2*x
-
     @interact(x0=x_slider)
     def plot_data_and_hyp_with_error(x0):    
         fig, axis = plt.subplots(1, 2, figsize=(18, 6), dpi=300)
@@ -282,14 +281,86 @@ def plot_func_and_der(same=True):
             axis[0].plot([begin, end], [f(0), f(0)], 
                      color='black', linestyle='dashed')
     
-
         plt.show() 
     
+def plot_simple_func_and_der(same=True):
+    
+    def f(x):
+        return x**2 + 1.5
+    
+    def der_f(x):
+        return 2*x
+    
+    plot_func_and_der(f, der_f, same=same)
+    
+
+    
+
+def der_J(X, y, k):
+    return np.mean((k*X - y)*X)*2
+
+def plot_all_J_with_der(X, y):
+    k_slider = FloatSlider(min=0, max=2, step=0.1, value=0.1)
+
+    @interact(k=k_slider)
+    def plot_all_J_with_der_inner(k):
+        plt.figure(figsize=(8, 5))
+        plt.title("Значение ошибки")
+        plt.ylabel("Значение функции потерь")
+        plt.xlabel("Значение коэффициента $k$")
+        ks = np.linspace(-1, 2.65, 100)
+        plt.plot(ks, [J(tmp_k, X, y) for tmp_k in ks], color='black')
+        plt.scatter(k, J(k, X, y), s=50, marker='+', label="Текущее значение")
+        
+        k_0 = (k - J(k, X, y) / der_J(X, y, k))
+        k_next = 5 if k > k_0 else -5
+        
+        plt.plot([ k_0, k_next], [0, J(k, X, y) + der_J(X, y, k)*(k_next - k)], label="Текущее значение")
+        plt.legend()
+        plt.grid()
+        plt.xlim([-1, 3])
+        plt.ylim([0, 0.15])
+        plt.show() 
 
 
+    
+def lin_grad_trace(X, y, k_init, alpha, iters=20):
+    plt.figure(figsize=(10, 5))
+    plt.title("Значение ошибки")
+    plt.ylabel("Значение функции потерь")
+    plt.xlabel("Значение коэфициента")
+    T = np.linspace(-1, 2.6, 100)
+    plt.plot(T, [J(t, X, y) for t in T], color='black')
+    plt.scatter(k_init, J(k_init, X, y), color='green', marker="o", label="Начальная значение $k$")
+    k = k_init
+    for i in range(iters):
+        tmp_k = k
+        k = k - alpha * der_J(X, y, k)
+        plt.plot([tmp_k, k], [J(tmp_k, X, y), J(k, X, y)], color='black', linestyle='dashed')
+        if i == 0:
+            plt.scatter(k, J(k, X, y), color='blue', marker="o", label="Промежуточные значения $k$")
+        else:
+            plt.scatter(k, J(k, X, y), color='blue', marker="o")
+    plt.scatter(k, J(k, X, y), color='red', marker="o", label="Конечное значение $k$")
+    plt.ylim([0, 0.1])
+    plt.xlim([-0.5, 2])
+    plt.legend(loc='best')
+    plt.text(-0.5, 0, s="$k$="+f"{k:.4}", va='bottom', ha='left')
+    plt.show()    
+    return k
 
+      
+    
+def Traice(X, y):
+    k_init = FloatSlider(min=-0.1, max=1.8, step=0.1, value=0, description='$k$ init:')
+    alpha = FloatSlider(min=0.1, max=12, step=0.1, value=0.1, description='$\\alpha$:', readout_format='.5f',)   
 
+    @interact(k_init=k_init, a=alpha)
+    def plot_data_and_hyp_with_error(k_init, a):    
+        k = lin_grad_trace(X, y, k_init=k_init, alpha=a, iters=8)   
 
+ 
+        
 def lin_grad(X, y, k_init, alpha, iters=20):
     plt.title("Значение ошибки")
     plt.ylabel("Значение средней квадратичной ошибки")
@@ -307,40 +378,6 @@ def lin_grad(X, y, k_init, alpha, iters=20):
     
     return k
     
-def lin_grad_trace(X, y, k_init, alpha, iters=20):
-    plt.figure(figsize=(10, 5))
-    plt.title("Значение ошибки")
-    plt.ylabel("Значение функции потерь")
-    plt.xlabel("Значение коэфициента")
-    T = np.linspace(170000, 200000, 100)
-    plt.plot(T, [J(t, X, y) for t in T], color='black')
-    plt.scatter(k_init, J(k_init, X, y), color='Yellow', marker="o")
-    k = k_init
-    for i in range(iters):
-        tmp_k = k
-        
-        k = k - alpha * der_J(X, y, k)
-        plt.plot([tmp_k, k], [J(tmp_k, X, y), J(k, X, y)], color='black', linestyle='dashed')
-        plt.scatter(k, J(k, X, y), color='blue', marker="o")
-    plt.scatter(k, J(k, X, y), color='red', marker="o")
-    plt.ylim([0.7*10e11, 1.1*10e11])
-    plt.xlim([171000, 199000])
-    plt.show()    
-    return k
-
-
-    
-    
-    
-def Traice(X, y):
-    k_init = IntSlider(min=176000, max=196000, step=2000, value=176000, description='K init:')
-    alpha = FloatSlider(min=0.0001, max=0.001, step=0.00005, value=0.0001, description='alpha:', readout_format='.5f',)   
-      
-
-    @interact(k_init=k_init, a=alpha)
-    def plot_data_and_hyp_with_error(k_init, a):    
-        k = lin_grad_trace(X, y, k_init=k_init, alpha=a, iters=8)  
-
     
 def get_new_data():
     
