@@ -33,7 +33,7 @@ def get_data():
     k = 0.5 
     b = .1
 
-    y = np.round(k*X + b + .045*np.random.normal(size=X.shape), 2)
+    y = np.round(k*X + b + .03*np.random.normal(size=X.shape), 2)
     
     return X, y
 
@@ -41,10 +41,10 @@ def get_data():
 def create_base_plot():
     plt.rcParams.update({'font.size': 22})
     plt.figure(figsize=(10, 5), dpi=300)
-    plt.xlabel("Площадь квартиры,\nквадратные метры", fontsize=22)
-    plt.ylabel("Цена квартиры,\nмлн рублей", fontsize=22)
-    plt.ylim([0, X_LIM])
-    plt.xlim([0, Y_LIM])
+    plt.xlabel("Значение X", fontsize=22)
+    plt.ylabel("Значение Y", fontsize=22)
+    plt.ylim([0, Y_LIM])
+    plt.xlim([0, X_LIM])
     plt.grid()
 
 
@@ -54,12 +54,8 @@ def plot_data(X, y):
     plt.show()
 
     
-def visualize_X(X):
-    print(pd.DataFrame(X, columns=['Площадь квартиры, кв. метры']))
-    
-    
-def visualize_y(y):
-    print(pd.DataFrame(y, columns=['Цена квартиры, млн. руб.']))
+def visualize_Xy(X, y):
+    print(pd.DataFrame(np.column_stack([X, y]), columns=['Значение X', 'Значение Y']))
     
     
 def plot_data_and_hyp(X, y, k):    
@@ -88,6 +84,7 @@ def plot_data_and_error(X, y):
         length = len(X)
         plt.plot(np.linspace(0, 1, length), k*np.linspace(0, 1, length), label="k={0}".format(k), color='black')   
         plt.scatter(X, y,  color='black', marker="o", s=50)  
+        plt.scatter(X, k*X,  color='black', marker="x", s=50)  
         plt.legend(loc="upper left") 
     
         for x_i, y_i in zip(X, y):
@@ -95,7 +92,19 @@ def plot_data_and_error(X, y):
             
         plt.scatter(X, y,  color='black', marker="o", s=50)  
         plt.show()
+
+def f(X, k):
+    return k*X
+
+def error_on_sample(X, y, k):
+    for i in range(X.shape[0]): 
+        diff = f(X[i], k) - y[i]
+        print(f"Разница на примере {i} равна {diff:.4}")
         
+def quad_error_on_sample(X, y, k):
+    for i in range(X.shape[0]): 
+        diff_quad = (f(X[i], k) - y[i])**2
+        print(f"Квадрат разницы на примере {i} равен {diff_quad:.4}")       
         
 def J(k, X, y):
     return np.mean((y - k*X)**2)
