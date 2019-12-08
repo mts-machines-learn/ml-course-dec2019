@@ -4,7 +4,7 @@
 
 ### Быстрые ссылки
 
-🗨 [Mattermost](https://mattermost.westeurope.cloudapp.azure.com/signup_user_complete/?id=otqt5qwp9fbbpj3n4hzyc4hp6h) для общения участников курса и преподавателей.
+💬 [Mattermost](https://mattermost.westeurope.cloudapp.azure.com/signup_user_complete/?id=otqt5qwp9fbbpj3n4hzyc4hp6h) для общения участников курса и преподавателей.
 
 📺 [Трансляция первой лекции](https://youtu.be/6lH9u5gLOv0) 9 декабря в 16:00 Мск
 
