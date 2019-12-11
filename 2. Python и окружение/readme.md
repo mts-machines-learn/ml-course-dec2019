@@ -8,7 +8,7 @@
 
 ### Домашнее задание
 
-Домашнее задание в файле [Homework_2.ipynb](https://github.com/mts-machines-learn/ml-course-dec2019/blob/lesson2/2.%20Python%20%D0%B8%20%D0%BE%D0%BA%D1%80%D1%83%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5/Homework_2.ipynb). Вы можете клонировать репозиторий к себе на диск и сделать домашку в локальном Jupyter Notebook, или можете открыть файл в Colab: <a href="https://colab.research.google.com/github/mts-machines-learn/ml-course-dec2019/blob/lesson2/2. Python и окружение/Homework_2.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg"/></a>.
+Домашнее задание в файле [Homework_2.ipynb](https://github.com/mts-machines-learn/ml-course-dec2019/blob/master/2.%20Python%20%D0%B8%20%D0%BE%D0%BA%D1%80%D1%83%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5/Homework_2.ipynb). Вы можете клонировать репозиторий к себе на диск и сделать домашку в локальном Jupyter Notebook, или можете открыть файл в Colab: <a href="https://colab.research.google.com/github/mts-machines-learn/ml-course-dec2019/blob/master/2. Python и окружение/Homework_2.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg"/></a>.
 
 После того, как вы закончите упражнения, сохраните файл. Если вы делаете домашку в Colab, скачайте файл с помощью пункта меню `File → Download *.ipynb`.
 
