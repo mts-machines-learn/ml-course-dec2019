@@ -34,7 +34,6 @@ def get_data():
     b = .1
 
     y = np.round(k*X + b + .03*np.random.normal(size=X.shape), 2)
-    
     return X, y
 
 
@@ -61,7 +60,7 @@ def visualize_Xy(X, y):
 def plot_data_and_hyp(X, y, k):    
     create_base_plot()
     length = len(X)
-    plt.plot(np.linspace(0, 1, length), k*np.linspace(0, 1, length), label="k={0}".format(k), color='black')   
+    plt.plot(np.linspace(0, 1, length), k*np.linspace(0, 1, length), label="k={0:.5f}".format(k), color='black')   
     plt.scatter(X, y,  color='black', marker="o", s=50)  
     plt.legend(loc="upper left")   
     plt.show()
@@ -157,12 +156,16 @@ def plot_all_loss(X, y):
     plt.title("Функция ошибки")
     plt.ylabel("Значение функции потерь")
     plt.xlabel("Значение коэффициента $k$")
-    k = np.linspace(-1, 2.65, 100)
-    plt.plot(k, [J(tmp_k, X, y) for tmp_k in k], color='black')
-    plt.ylim([0, min([J(k[0], X, y), J(k[-1], X, y)])])
+    k = np.linspace(0, 2, 100)
+    plt.plot(k, [J(X, y, tmp_k) for tmp_k in k], color='black')
+    plt.ylim([0, min([J(X, y, k[0]), J(X, y, k[-1])])])
     plt.grid()
     plt.show()
 
+    
+def analytical_solution(X, y):
+    return np.round(np.sum(y*X)/np.sum(X*X), 6)
+    
 
 def derivation(x0):
     
@@ -320,8 +323,12 @@ def J(X, y, k):
     return np.mean((k*X - y)**2)
 
 
-def plot_loss_and_der(X, y, same=True):
-    k_slider = FloatSlider(min=-2, max=2, step=0.1, value=2, description='$k$')
+def plot_loss_and_der(X, y, same=True, der_value=False):
+    
+    if not der_value:
+        k_slider = FloatSlider(min=-2, max=2, step=0.1, value=2, description='k')
+    else:
+        k_slider = FloatSlider(min=-4, max=5, step=0.1, value=2, description='k')
     
     @interact(k0=k_slider)
     def plot_data_and_hyp_with_error(k0):    
@@ -345,7 +352,20 @@ def plot_loss_and_der(X, y, same=True):
         axis[1].scatter(k0, der_J(X, y, k0), color='black')
         
         axis[0].set_title("$\dfrac{1}{N} \sum_{i=1}^{N} (kX_i - y_i)^2$")
-        axis[1].set_title("$\dfrac{2}{N} \sum_{i=1}^{N} (kX_i - y_i)X_i$")
+        
+        if not der_value:
+            axis[1].set_title("$\dfrac{2}{N} \sum_{i=1}^{N} (kX_i - y_i)X_i$")
+        else:
+            axis[1].set_title("$\dfrac{2}{N} \sum_{i=1}^{N} (kX_i - y_i)X_i=$" + "{0:.2f}".format(der_J(X, y, k0)))
+        
+        axis[0].set_xlabel("Значение параметра $k$")
+        axis[0].set_ylabel("Значение функции ошибки")
+        
+        axis[1].set_xlabel("Значение параметра $k$")
+        axis[1].set_ylabel("Значение производной\nфункции ошибки")
+        
+        
+            
 
         begin = -15
         end = 25
@@ -355,7 +375,7 @@ def plot_loss_and_der(X, y, same=True):
         else:
             axis[0].plot([begin, end], [J(X, y, k0), J(X, y, k0)], 
                      color='black', linestyle='dashed')
-    
+        plt.tight_layout()
         plt.show()    
 
 def interactive_gradient_descent(X, y, iters=10):
@@ -461,7 +481,7 @@ def plot_func_in_3d():
         
 def plot_3d_func_with_grad(x0=0, y0=0, pos_neg_grad=None):    
 
-    fig = plt.figure(figsize=(15, 15))
+    fig = plt.figure(figsize=(12, 12))
 
 
     if pos_neg_grad is not None:
@@ -521,8 +541,8 @@ def plot_3d_func_with_grad(x0=0, y0=0, pos_neg_grad=None):
     plt.xlabel('Значение параметра $x$')
     plt.ylabel('Значение параметра $y$')
 
-    plt.xlim([-10, 10])
-    plt.ylim([-10, 10])
+    plt.xlim([-9, 7])
+    plt.ylim([-9, 7])
     plt.title("$\phi(x, y) = (1.5x + 2.5)^2 + 2.5y^2 + 0.5$")
 
     lines = np.unique(Z.flatten())
@@ -549,8 +569,8 @@ def plot_3d_func_with_grad_interactive():
         grad = a*der_f_3d(x0, y0)
         plt.text(-10, 9.5, "$x_0 = " + "{0:.3} $".format(x0), ha='left', va="center")
         plt.text(-10, 9, "$y_0 = " + "{0:.3} $".format(y0), ha='left', va="center")
-        plt.text(-10, 8, "$\\alpha \dfrac{\delta \phi(x, y)}{\delta x} = 4.5x + 7.5 = " + "{0:.3} $".format(grad[0]), ha='left', va="center")
-        plt.text(-10, 6.5, "$\\alpha \dfrac{\delta \phi(x, y)}{\delta y} = 5y = " + "{0:.3} $".format(grad[1]), ha='left', va="center")
+        plt.text(-10, 8, "$\\alpha \dfrac{\delta \phi(x, y)}{\delta x} = \\alpha(4.5x + 7.5) = " + "{0:.3} $".format(grad[0]), ha='left', va="center")
+        plt.text(-10, 6.5, "$\\alpha \dfrac{\delta \phi(x, y)}{\delta y} = \\alpha(5y) = " + "{0:.3} $".format(grad[1]), ha='left', va="center")
         
         ha_pos = 'right' if x0 < 0.5 else 'left'
         va_pos = 'top' if y0 > 0 else 'bottom'
@@ -681,13 +701,12 @@ def plot_linear_loss_in_3d_up(X, y):
     for i in range(len(ks)):
         for j in range(len(bs)):
             Z[i, j] = linearn_loss_function(X, y, ks[i, j], bs[i, j])
-   # Z = 
+
     plt.xlabel('Значение параметра $k$')
     plt.ylabel('Значение параметра $b$')
 
     lines = np.unique(np.round(Z.ravel(), 3))
     lines.sort()
-    print(len(lines))
     ind = np.array([2**i for i in range(10)])
     plt.contour(ks, bs, Z, lines[ind], cmap=cm.coolwarm)  # нарисовать указанные линии уровня
     
