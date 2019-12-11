@@ -1,7 +1,7 @@
 # 1. Введение в машинное обучение. 
 
 
-📺 [Трансляция лекции](https://youtu.be/6lH9u5gLOv0) 9 декабря в 16:00 Мск
+📺 [Запись лекции](https://youtu.be/6lH9u5gLOv0)
 
 📒 [Смотреть презентацию в Google Slides](https://docs.google.com/presentation/d/1EdoT9tpmNYiqb3UaTGtDv4C5pUoncwJ18P38EcJnIYs/edit?usp=sharing)
 
