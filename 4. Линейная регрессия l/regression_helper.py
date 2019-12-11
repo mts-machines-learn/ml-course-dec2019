@@ -105,14 +105,10 @@ def quad_error_on_sample(X, y, k):
     for i in range(X.shape[0]): 
         diff_quad = (f(X[i], k) - y[i])**2
         print(f"Квадрат разницы на примере {i} равен {diff_quad:.4}")       
-        
-def J(k, X, y):
-    return np.mean((y - k*X)**2)
 
 
-def plot_data_and_J(X, y):
+def plot_data_and_loss(X, y, with_der=False):
     plt.rcParams.update({'font.size': 20})
-    
     
     k_slider = FloatSlider(min=0, max=2, step=0.1, value=0.1)
 
@@ -138,7 +134,11 @@ def plot_data_and_J(X, y):
         axis[1].set_title("Значение ошибки\nдля гипотезы", fontsize=24)
         axis[1].set_ylabel("Значение функции потерь", fontsize=20)
         axis[1].set_xlabel("Значение коэффициента $k$")
-        axis[1].scatter(k, J(k, X, y),  marker="+", label="J={0}".format( round(J(k, X, y), 3)), s=50, color=c)
+        
+        axis[1].scatter(k, J(X, y, k),  marker="+", label="$Loss({0})={1}$".format(k, round(J(X, y, k), 3)), s=50, color=c)
+        if with_der: 
+            der_label= "$\dfrac{d Loss(" + str(k) + ")}{dk}$=" + str(round(der_J(X, y, k), 3))
+            axis[1].text(-1, 0, s=der_label, color=c, ha='left', va='bottom')
         axis[1].set_xlim([-1, 3])
         axis[1].set_ylim([0, 0.15])
         axis[1].legend()    
@@ -148,10 +148,10 @@ def plot_data_and_J(X, y):
         axis[1].tick_params(axis='both', which='major', labelsize=20)
         axis[1].tick_params(axis='both', which='minor', labelsize=20)
         axis[1].grid()
-        plt.show()   
+        plt.show()  
     
     
-def plot_all_J(X, y):
+def plot_all_loss(X, y):
     plt.rcParams.update({'font.size': 22})
     plt.figure(figsize=(10, 5))
     plt.title("Функция ошибки")
@@ -165,7 +165,8 @@ def plot_all_J(X, y):
 
 
 def derivation(x0):
-    d_slider = FloatSlider(min=-1, max=1.5, step=0.1001, value=-10, description='$\Delta x$', readout_format='.2f')
+    
+    d_slider = FloatSlider(min=-1, max=1.5, step=0.10001, value=-1 if x0 < 0 else 1.5, description='$\Delta x$', readout_format='.2f')
 
     def f(x):
         return x**2 + 1.5
@@ -179,7 +180,7 @@ def derivation(x0):
     def interact_plot_data_and_hyp(dx):
         fig, ax = plt.subplots(figsize=(10, 5), dpi=300)
         
-        if d_slider.value == 0.001:
+        if d_slider.value == 0.0001:
             d_slider.readout_format='.4f'
         else:
             d_slider.readout_format='.2f'
@@ -249,7 +250,8 @@ def derivation(x0):
         plt.text(-4, y0-0.1, "$f(x_0)$", ha='left', va='top')
         plt.text(x0-0.1, -1, "$x_0$", ha='right', va='bottom')
 
-        plt.scatter([x0, x1], [y0, y1], color='black', marker="o", s=50) 
+        plt.scatter(x0, y0, color='red', marker="o", s=50) 
+        plt.scatter(x1, y1, color='blue', marker="o", s=50) 
 
         plt.plot([x0, x1], [y0, y0], color='black', linestyle='dashed')
         plt.plot([x1, x1], [y0, y1], color='black', linestyle='dashed')
@@ -300,7 +302,7 @@ def plot_func_and_der(f, der_f, same=True):
     
         plt.show() 
     
-def plot_simple_func_and_der(same=True):
+def plot_simple_func_and_der(same=False):
     
     def f(x):
         return x**2 + 1.5
