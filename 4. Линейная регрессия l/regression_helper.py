@@ -19,7 +19,7 @@ rc('font', **font)
 
     
 X_LIM = 0.6
-Y_LIM = 0.6
+Y_LIM = 10
 
 
 seed = 6942069
@@ -30,18 +30,18 @@ def get_data():
     X = np.random.randint(10, 50, size=(20, )) / 100
     X.sort()
     
-    k = 0.5 
-    b = .1
+    k = 15 
+    b = 2
 
-    y = np.round(k*X + b + .03*np.random.normal(size=X.shape), 2)
+    y = np.clip(np.round(k*X + b + .5*np.random.normal(size=X.shape), 2), a_min=0, a_max=10)
     return X, y
 
 
 def create_base_plot():
     plt.rcParams.update({'font.size': 22})
     plt.figure(figsize=(10, 5), dpi=300)
-    plt.xlabel("Значение X", fontsize=22)
-    plt.ylabel("Значение Y", fontsize=22)
+    plt.xlabel("Доля свободного времени потраченного на учебу", fontsize=22)
+    plt.ylabel("Средняя оценка", fontsize=22)
     plt.ylim([0, Y_LIM])
     plt.xlim([0, X_LIM])
     plt.grid()
@@ -54,28 +54,29 @@ def plot_data(X, y):
 
     
 def visualize_Xy(X, y):
-    print(pd.DataFrame(np.column_stack([X, y]), columns=['Значение X', 'Значение Y']))
+    print(pd.DataFrame(np.column_stack([X, y]), columns=['Доля свободного времени, потраченного на учебу', 'Средняя оценка']))
     
     
 def plot_data_and_hyp(X, y, k):    
     create_base_plot()
     length = len(X)
-    plt.plot(np.linspace(0, 1, length), k*np.linspace(0, 1, length), label="k={0:.5f}".format(k), color='black')   
+    plt.plot(np.linspace(0, 1, length), k*np.linspace(0, 1, length), label="k={0:.2f}".format(k), color='black')   
     plt.scatter(X, y,  color='black', marker="o", s=50)  
     plt.legend(loc="upper left")   
     plt.show()
 
     
 def choose_slope(X, y):
-    k_slider = FloatSlider(min=0, max=2, step=0.1, value=0.1)
+    k_slider = FloatSlider(min=0, max=40, step=2, value=10)
 
     @interact(k=k_slider)
     def interact_plot_data_and_hyp(k):
         plot_data_and_hyp(X, y, k)
     
+    
 
 def plot_data_and_error(X, y):
-    k_slider = FloatSlider(min=0, max=2, step=0.1, value=0.1)
+    k_slider = FloatSlider(min=0, max=40, step=2, value=10)
 
     @interact(k=k_slider)
     def plot_data_and_hyp_with_error(k):    
@@ -103,13 +104,16 @@ def error_on_sample(X, y, k):
 def quad_error_on_sample(X, y, k):
     for i in range(X.shape[0]): 
         diff_quad = (f(X[i], k) - y[i])**2
-        print(f"Квадрат разницы на примере {i} равен {diff_quad:.4}")       
+        print(f"Квадрат разницы на примере {i} равен {diff_quad:.4}")      
+        
 
+def J(X, y, k):
+    return np.mean((k*X - y)**2)
 
 def plot_data_and_loss(X, y, with_der=False):
     plt.rcParams.update({'font.size': 20})
     
-    k_slider = FloatSlider(min=0, max=2, step=0.1, value=0.1)
+    k_slider = FloatSlider(min=0, max=40, step=2, value=10)
 
     @interact(k=k_slider)
     def plot_data_and_hyp_with_error(k):    
@@ -119,17 +123,17 @@ def plot_data_and_loss(X, y, with_der=False):
         length = len(X)
         
         axis[0].plot(np.linspace(0, 0.6, length),  k*np.linspace(0, 0.6, length), label="k={0}".format(k), color=c)
-        axis[0].set_title("Полученая линейная функция")
+        axis[0].set_title("Полученная линейная функция")
         for x_i, y_i in zip(X, y):
             axis[0].plot([x_i, x_i], [x_i * k, y_i], color='red')
         axis[0].scatter(X, y,  color='black', marker="o", s=50)  
-        axis[0].set_xlabel("Дальность квартиры от метро, метры")
-        axis[0].set_ylabel("Цена квартиры, млн рублей")
+        axis[0].set_xlabel("Доля свободного времени потраченного на учебу")
+        axis[0].set_ylabel("Средняя оценка")
         axis[0].set_xlim(0, X_LIM)
         axis[0].set_ylim(0, Y_LIM)
         axis[0].legend()    
         axis[0].grid()
-
+        
         axis[1].set_title("Значение ошибки\nдля гипотезы", fontsize=24)
         axis[1].set_ylabel("Значение функции потерь", fontsize=20)
         axis[1].set_xlabel("Значение коэффициента $k$")
@@ -138,8 +142,8 @@ def plot_data_and_loss(X, y, with_der=False):
         if with_der: 
             der_label= "$\dfrac{d Loss(" + str(k) + ")}{dk}$=" + str(round(der_J(X, y, k), 3))
             axis[1].text(-1, 0, s=der_label, color=c, ha='left', va='bottom')
-        axis[1].set_xlim([-1, 3])
-        axis[1].set_ylim([0, 0.15])
+        axis[1].set_xlim([-1, 41])
+        axis[1].set_ylim([0, 49])
         axis[1].legend()    
        
 
@@ -153,10 +157,9 @@ def plot_data_and_loss(X, y, with_der=False):
 def plot_all_loss(X, y):
     plt.rcParams.update({'font.size': 22})
     plt.figure(figsize=(10, 5))
-    plt.title("Функция ошибки")
-    plt.ylabel("Значение функции потерь")
+    plt.ylabel("Значение функции ошибки")
     plt.xlabel("Значение коэффициента $k$")
-    k = np.linspace(0, 2, 100)
+    k = np.linspace(0, 41, 100)
     plt.plot(k, [J(X, y, tmp_k) for tmp_k in k], color='black')
     plt.ylim([0, min([J(X, y, k[0]), J(X, y, k[-1])])])
     plt.grid()
@@ -319,31 +322,29 @@ def plot_simple_func_and_der(same=False):
 def der_J(X, y, k):
     return 2*np.mean((k*X - y)*X)
 
-def J(X, y, k):
-    return np.mean((k*X - y)**2)
 
 
 def plot_loss_and_der(X, y, same=True, der_value=False):
     
     if not der_value:
-        k_slider = FloatSlider(min=-2, max=2, step=0.1, value=2, description='k')
+        k_slider = FloatSlider(min=0, max=40, step=2, value=2, description='k')
     else:
-        k_slider = FloatSlider(min=-4, max=5, step=0.1, value=2, description='k')
+        k_slider = FloatSlider(min=0, max=40, step=2, value=2, description='k')
     
     @interact(k0=k_slider)
     def plot_data_and_hyp_with_error(k0):    
         fig, axis = plt.subplots(1, 2, figsize=(18, 6), dpi=300)
     
         for ax in axis:
-            ax.set_xlim(-5, 6.5)
+            ax.set_xlim(0, 40)
             ax.grid()
             
         
-        axis[0].set_ylim(-1, 5)
-        axis[1].set_ylim(-1, 1)
+        axis[0].set_ylim(0, 50)
+        #axis[1].set_ylim(-1, 1)
             
         length = 1000
-        ks = np.linspace(-12, 12, length)
+        ks = np.linspace(0, 40, length)
         
         axis[0].plot(ks, [J(X, y, k) for k in ks], color='black')
         axis[1].plot(ks, [der_J(X, y, k) for k in ks], color='black')
@@ -363,12 +364,10 @@ def plot_loss_and_der(X, y, same=True, der_value=False):
         
         axis[1].set_xlabel("Значение параметра $k$")
         axis[1].set_ylabel("Значение производной\nфункции ошибки")
-        
-        
-            
+
 
         begin = -15
-        end = 25
+        end = 60
         if k0 != 0:
             axis[0].plot([begin, end], [der_J(X, y, k0)*(begin-k0) + J(X, y, k0), der_J(X, y, k0)*(end-k0) + J(X, y, k0)], 
                      color='black', linestyle='dashed')
@@ -379,7 +378,7 @@ def plot_loss_and_der(X, y, same=True, der_value=False):
         plt.show()    
 
 def interactive_gradient_descent(X, y, iters=10):
-    k_init = FloatSlider(min=-0.1, max=1.8, step=0.1, value=0.1, description='$k$ init:')
+    k_init = FloatSlider(min=0, max=15, step=1, value=0, description='$k$ init:')
     alpha = FloatSlider(min=0.1, max=12, step=0.5, value=0.5, description='$\\alpha$:', readout_format='.1f',)   
     iteration = IntSlider(min=0, max=50, step=1, value=0, description='Iteration #:')  
 
@@ -392,10 +391,10 @@ def interactive_gradient_descent(X, y, iters=10):
             
         axis[0].set_title("Значение ошибки")
         axis[0].set_ylabel("Значение функции потерь")
-        axis[0].set_xlabel("Значение коэфициента")
+        axis[0].set_xlabel("Значение коэффициента")
         
         
-        T = np.linspace(-1, 2.6, 100)
+        T = np.linspace(-0, 40, 100)
         axis[0].plot(T, [J(X, y, t) for t in T], color='black')
         axis[0].scatter(k_init, J(X, y, k_init), color='green', marker="o", label="Начальная значение $k$")
         k = float(k_init)
@@ -416,11 +415,11 @@ def interactive_gradient_descent(X, y, iters=10):
         
         
         if it > 0: axis[0].scatter(k, J(X, y, k), color='red', marker="o", label="Конечное значение $k$")
-        axis[0].set_ylim([0, 0.1])
-        axis[0].set_xlim([-0.5, 2])
-        
+        axis[0].set_ylim([0, 50])
+        axis[0].set_xlim([0, 40])
+        #
         axis[1].set_xlim([0, 0.6])
-        axis[1].set_ylim([0, 0.6])
+        axis[1].set_ylim([0, 10])
         axis[1].set_title("J({0:.3f}) = {1:.4f}".format(k, J(X, y, k)))
         
         axis[0].legend(loc='best')
@@ -432,15 +431,15 @@ def interactive_gradient_descent(X, y, iters=10):
 def plot_data_and_hyp_with_bias(X, y, k, b):    
     create_base_plot()
     length = len(X)
-    plt.plot(np.linspace(0, 1, length), k*np.linspace(0, 1, length) + b, label="k={0:.4f}, b={1:.4f}".format(k, b), color='black')   
+    plt.plot(np.linspace(0, 1, length), k*np.linspace(0, 1, length) + b, label="k={0:.2f}, b={1:.2f}".format(k, b), color='black')   
     plt.scatter(X, y,  color='black', marker="o", s=50)  
     plt.legend(loc="upper left")   
     plt.show()
 
     
 def choose_slope_with_bias(X, y):
-    k_slider = FloatSlider(min=0, max=2, step=0.1, value=0.1)
-    b_slider = FloatSlider(min=-0.5, max=0.5, step=0.01, value=0.1)
+    k_slider = FloatSlider(min=0, max=40, step=2, value=2)
+    b_slider = FloatSlider(min=0, max=10, step=1, value=0)
 
     @interact(k=k_slider, b=b_slider)
     def interact_plot_data_and_hyp(k, b):
@@ -541,8 +540,8 @@ def plot_3d_func_with_grad(x0=0, y0=0, pos_neg_grad=None):
     plt.xlabel('Значение параметра $x$')
     plt.ylabel('Значение параметра $y$')
 
-    plt.xlim([-9, 7])
-    plt.ylim([-9, 7])
+    plt.xlim([-10, 10])
+    plt.ylim([-10, 10])
     plt.title("$\phi(x, y) = (1.5x + 2.5)^2 + 2.5y^2 + 0.5$")
 
     lines = np.unique(Z.flatten())
@@ -653,14 +652,14 @@ def plot_linear_loss_in_3d(X, y):
         fig = plt.figure(figsize=(15, 10))
         ax = fig.gca(projection='3d')
 
-        k_min = -2
-        k_max = 3
+        k_min = 5
+        k_max = 25
 
-        b_min = -3
-        b_max = 3
+        b_min = -5
+        b_max = 10
 
-        ks = np.linspace(-2, 3, 40)
-        bs = np.linspace(-1, 1, 40)
+        ks = np.linspace(k_min, k_max, 40)
+        bs = np.linspace(b_min, b_max, 40)
         ks, bs = np.meshgrid(ks, bs)
 
         Z = np.zeros_like(ks)
@@ -675,8 +674,8 @@ def plot_linear_loss_in_3d(X, y):
         surf = ax.plot_surface(ks, bs, Z,   linewidth=0, antialiased=False, cmap=cm.coolwarm)
         ax.view_init(angle1, angle2)
         
-        ax.set_xlim([-2, 3])
-        ax.set_ylim([-1, 1])
+        #ax.set_xlim([-2, 3])
+        #ax.set_ylim([-1, 1])
         
         plt.show()
 
@@ -687,11 +686,11 @@ def plot_linear_loss_in_3d_up(X, y):
 
     # Make data.
     
-    k_min = -1
-    k_max = 1
+    k_min = 5
+    k_max = 25
 
-    b_min = -0.3
-    b_max = 0.7
+    b_min = -5
+    b_max = 10
     
     ks = np.linspace(k_min, k_max, 60)
     bs = np.linspace(b_min, b_max, 60)
@@ -707,16 +706,17 @@ def plot_linear_loss_in_3d_up(X, y):
 
     lines = np.unique(np.round(Z.ravel(), 3))
     lines.sort()
-    ind = np.array([2**i for i in range(10)])
+    ind = np.array([2**i for i in range(math.floor(math.log(len(lines), 2)) + 1)])
+    
     plt.contour(ks, bs, Z, lines[ind], cmap=cm.coolwarm)  # нарисовать указанные линии уровня
     
-    plt.xlim([-1, 1])
-    plt.ylim([-.3, .7])
+    #plt.xlim([-1, 1])
+    #plt.ylim([-.3, .7])
     plt.show()
 
     
 def gradient_function(X, y, k, b):    
-    return np.array([2*np.mean( ((k * X + b) - y) * X), 2*np.mean( ((k * X + b) - y))])
+    return np.array([2*np.mean( ((k * X + b) - y) * X), 2*np.mean( ((k * X + b) - y) )])
 
 def plot_gradient_descent_in_3d(X, y, iters=5, alpha=0.15):    
     
@@ -745,10 +745,10 @@ def plot_gradient_descent_in_3d(X, y, iters=5, alpha=0.15):
     # Make data.
     
     k_min = -1
-    k_max = 1
+    k_max = 25
 
-    b_min = -0.3
-    b_max = 0.7
+    b_min = -5
+    b_max = 10
     
     ks = np.linspace(k_min, k_max, 60)
     bs = np.linspace(b_min, b_max, 60)
@@ -765,12 +765,12 @@ def plot_gradient_descent_in_3d(X, y, iters=5, alpha=0.15):
 
     lines = np.unique(np.round(Z.ravel(), 3))
     lines.sort()
-    ind = np.array([2**i for i in range(10)])
+    ind = np.array([2**i for i in range(math.floor(math.log(len(lines), 2)) + 1)])
     plt.contour(ks, bs, Z, lines[ind], cmap=cm.coolwarm)  # нарисовать указанные линии уровня
     
     plt.legend()
-    plt.xlim([-1, 1])
-    plt.ylim([-0.3, 0.7])
+    #plt.xlim([-1, 1])
+    #plt.ylim([-0.3, 0.7])
     plt.show()
 
 
@@ -820,10 +820,10 @@ def plot_gradient_descent_in_3d_interactive(X, y, iters=5, alpha = 0.15):
 
 
         k_min = -1
-        k_max = 1
+        k_max = 25
 
-        b_min = -0.3
-        b_max = 0.7
+        b_min = -5
+        b_max = 10
 
         k_mesh = np.linspace(k_min, k_max, 60)
         b_mesh = np.linspace(b_min, b_max, 60)
@@ -840,13 +840,13 @@ def plot_gradient_descent_in_3d_interactive(X, y, iters=5, alpha = 0.15):
 
         lines = np.unique(np.round(Z.ravel(), 3))
         lines.sort()
-        ind = np.array([2**i for i in range(10)])
+        ind = np.array([2**i for i in range(math.floor(math.log(len(lines), 2)) + 1)])
         axis[0].contour(k_mesh, b_mesh, Z, lines[ind], cmap=cm.coolwarm)  # нарисовать указанные линии уровня
 
         axis[0].legend()
-        axis[0].set_xlim([-1, 1])
-        axis[0].set_ylim([-0.3, 0.7])
+        #axis[0].set_xlim([-1, 1])
+        #axis[0].set_ylim([-0.3, 0.7])
         axis[1].set_xlim([0, 0.6])
-        axis[1].set_ylim([0, 0.6])
+        axis[1].set_ylim([0, 10])
         axis[1].set_title("J({0:.3f}, {1:.3f}) = {2:.4f}".format(ks[k_i], bs[k_i], linearn_loss_function(X, y, ks[k_i], bs[k_i])))
         plt.show()
