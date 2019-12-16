@@ -340,13 +340,16 @@ def plot_loss_and_der(X, y, same=True, der_value=False):
             ax.grid()
             
         
-        axis[0].set_ylim(0, 50)
+        
         #axis[1].set_ylim(-1, 1)
             
         length = 1000
-        ks = np.linspace(0, 40, length)
+        begin = 0
+        end = 40
+        ks = np.linspace(begin, end, length)
         
-        axis[0].plot(ks, [J(X, y, k) for k in ks], color='black')
+        errors = [J(X, y, k) for k in ks]
+        axis[0].plot(ks, errors, color='black')
         axis[1].plot(ks, [der_J(X, y, k) for k in ks], color='black')
         
         axis[0].scatter(k0, J(X, y, k0), color='black')
@@ -364,10 +367,10 @@ def plot_loss_and_der(X, y, same=True, der_value=False):
         
         axis[1].set_xlabel("Значение параметра $k$")
         axis[1].set_ylabel("Значение производной\nфункции ошибки")
-
-
-        begin = -15
-        end = 60
+       
+        
+        axis[0].set_ylim(min(errors), max(errors))
+        
         if k0 != 0:
             axis[0].plot([begin, end], [der_J(X, y, k0)*(begin-k0) + J(X, y, k0), der_J(X, y, k0)*(end-k0) + J(X, y, k0)], 
                      color='black', linestyle='dashed')
@@ -378,7 +381,7 @@ def plot_loss_and_der(X, y, same=True, der_value=False):
         plt.show()    
 
 def interactive_gradient_descent(X, y, iters=10):
-    k_init = FloatSlider(min=0, max=15, step=1, value=0, description='$k$ init:')
+    k_init = FloatSlider(min=0, max=15, step=1, value=1, description='$k$ init:')
     alpha = FloatSlider(min=0.1, max=12, step=0.5, value=0.5, description='$\\alpha$:', readout_format='.1f',)   
     iteration = IntSlider(min=0, max=50, step=1, value=0, description='Iteration #:')  
 
@@ -393,9 +396,14 @@ def interactive_gradient_descent(X, y, iters=10):
         axis[0].set_ylabel("Значение функции потерь")
         axis[0].set_xlabel("Значение коэффициента")
         
+        begin = 0
+        end = 40
         
-        T = np.linspace(-0, 40, 100)
-        axis[0].plot(T, [J(X, y, t) for t in T], color='black')
+        T = np.linspace(begin, end, 100)
+        errors = [J(X, y, t) for t in T]
+        axis[0].set_ylim(min(errors), max(errors))
+        
+        axis[0].plot(T, errors, color='black')
         axis[0].scatter(k_init, J(X, y, k_init), color='green', marker="o", label="Начальная значение $k$")
         k = float(k_init)
         for i in range(it):
@@ -415,8 +423,8 @@ def interactive_gradient_descent(X, y, iters=10):
         
         
         if it > 0: axis[0].scatter(k, J(X, y, k), color='red', marker="o", label="Конечное значение $k$")
-        axis[0].set_ylim([0, 50])
-        axis[0].set_xlim([0, 40])
+        axis[0].set_ylim(min(errors), max(errors))
+        axis[0].set_xlim([begin, end])
         #
         axis[1].set_xlim([0, 0.6])
         axis[1].set_ylim([0, 10])
@@ -720,7 +728,7 @@ def gradient_function(X, y, k, b):
 
 def plot_gradient_descent_in_3d(X, y, iters=5, alpha=0.15):    
     
-    plt.figure(figsize=(15, 10))
+    plt.figure(figsize=(10, 10))
 
 
     k = 0
@@ -742,13 +750,16 @@ def plot_gradient_descent_in_3d(X, y, iters=5, alpha=0.15):
     plt.scatter(ks[1:-1], bs[1:-1], s=50, color='gray', label="Промежуточные значения")
     plt.scatter(ks[-1], bs[-1], s=50, color='r', label="Конечныеные значения")
     
+    k_fin = ks[-1]
+    b_fin = bs[-1]
+    
     # Make data.
     
     k_min = -1
     k_max = 25
 
-    b_min = -5
-    b_max = 10
+    b_min = -1
+    b_max = 25
     
     ks = np.linspace(k_min, k_max, 60)
     bs = np.linspace(b_min, b_max, 60)
@@ -772,6 +783,7 @@ def plot_gradient_descent_in_3d(X, y, iters=5, alpha=0.15):
     #plt.xlim([-1, 1])
     #plt.ylim([-0.3, 0.7])
     plt.show()
+    return k_fin, b_fin
 
 
     
