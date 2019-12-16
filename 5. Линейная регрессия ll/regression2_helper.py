@@ -257,12 +257,16 @@ def plot_poly_data(X, y, X_test=None, y_test=None):
     rc('font', **font)
     plt.figure(figsize=(10, 8))
     plt.rcParams.update({'font.size': 22})
-    plt.scatter(X, y)
-    if X_test is not None and y_test is not None:
-        plt.scatter(X_test, y_test)
     
-    plt.xlabel('Скорость')
-    plt.ylabel('Расход топлива 1ой ступени')
+    if X_test is not None and y_test is not None:
+        plt.scatter(X, y, label='Старые данные')
+        plt.scatter(X_test, y_test, label='Новые данные')
+        plt.legend()
+    else:
+        plt.scatter(X, y)
+    
+    plt.xlabel('Скорость\nкм/чaс')
+    plt.ylabel('Расход топлива 1ой ступени\nг/кВт час')
     plt.grid()
     plt.show()
     
@@ -271,8 +275,8 @@ def visualize_prediction(X, y_train, y_pred):
 
     plt.figure(figsize=(10,10))
     plt.scatter(X, y_train)
-    plt.xlabel('Скорость')
-    plt.ylabel('Расход топлива 1ой ступени')
+    plt.xlabel('Скорость\nкм/чaс')
+    plt.ylabel('Расход топлива 1ой ступени\nг/кВт час')
     plt.plot(X, y_pred, color='r')
     plt.grid()
     plt.show()
@@ -331,8 +335,8 @@ def plot_poly_results(X_poly_scaled, y_true, poly_transformer, scaler, regressor
 
     plt.figure(figsize=(10,10))
     plt.scatter(X_poly_scaled[:, 1], y_true)
-    plt.xlabel('Скорость')
-    plt.ylabel('Расход топлива 1ой ступени')
+    plt.xlabel('Скорость\nкм/чaс')
+    plt.ylabel('Расход топлива 1ой ступени\nг/кВт час')
     plt.ylim(min(y_true)-1, max(y_true)+1)
     plt.xlim(min(X_poly_scaled[:, 1]), max(X_poly_scaled[:, 1]))
     plt.grid()
@@ -377,3 +381,102 @@ def interactive_polynom(X, y_true, X_test=None, y_test=None):
 
         plt.plot(scaler.inverse_transform(x_axis_ticks)[:, 1], y_pred, color='r')
         plt.show()
+        
+def plot_mae_mse():
+    x_slrd = FloatSlider(min=-1.5, max=1.5, step=0.1, value=0, description='$x$')
+    @interact(x=x_slrd)
+    def f(x):
+        fig, axis = plt.subplots(1, 2, figsize=(18, 6))
+        ks = np.linspace(-1.5, 1.5, 200)
+
+        axis[0].plot(ks, ks**2, label="MSE", color='red')
+        axis[0].scatter(x, x**2, color='red')
+        axis[0].plot(ks, np.abs(ks), label="MAE", color='green')
+        axis[0].scatter(x, np.abs(x), color='green')
+        axis[0].set_title("Функция ошибки")
+        
+        axis[0].set_xticks([]) 
+        axis[0].set_yticks([])
+        axis[0].grid()
+        axis[0].legend()
+
+        axis[1].plot(ks, 2*ks, label="$MSE'$", color='red')
+        axis[1].scatter(x, 2*x, color='red')
+        axis[1].plot(ks, np.sign(ks), label="$MAE'$", color='green')
+        axis[1].scatter(x, np.sign(x), color='green')
+        axis[1].set_title("Производная функции ошибки")
+        
+        axis[1].legend()
+        axis[1].grid()
+        axis[1].set_xticks([]) 
+        axis[1].set_yticks([])
+
+        plt.show()
+        
+        
+from sklearn import linear_model
+
+def plot_outlier():
+    x = np.linspace(-1, 1, 15)
+    y = 5*x + 0.4*np.random.normal(size=(15,))
+    y[10] = -5
+    plt.figure(figsize=(10, 7))
+    plt.scatter(x, y)
+    plt.scatter(x[10], y[10], label='Выброс')
+    plt.legend()
+    plt.show()
+    
+def plot_regression_with_outlier():
+    x = np.linspace(-1, 1, 15)
+    y = 5*x + 0.4*np.random.normal(size=(15,))
+    y[10] = -5
+    plt.figure(figsize=(10, 7))
+    plt.scatter(x, y)
+    plt.scatter(x[10], y[10], label='Выброс')
+    clf_l2 = linear_model.SGDRegressor(max_iter=1000, penalty=None)
+    clf_l2.fit(x.reshape(-1, 1), y)
+    clf_l1 = linear_model.SGDRegressor(loss='epsilon_insensitive',  epsilon=0, max_iter=1000, penalty=None)
+    clf_l1.fit(x.reshape(-1, 1), y)
+
+    plt.plot(x, clf_l2.predict(x.reshape(-1, 1)), label='Линейная регрессия на MSE', color='red')
+    plt.plot(x, clf_l1.predict(x.reshape(-1, 1)), label='Линейная регрессия на MAE', color='green')
+    plt.legend()
+    plt.show()
+        
+# ************************************** HOMEWORK ************************************
+
+def polinom_function(X_m, theta):
+    return np.dot(X_m, theta)
+
+def get_homework_data():
+    X = np.linspace(-3, 3, 100)
+
+    return X, X**3 + X**2 + X + 1 + 1.5*np.random.normal(size=(100,))
+
+def plot_poly_hw_results(X_poly_scaled, y_true, theta_init, theta, means, stds):
+    font = {'family': 'Verdana', 'weight': 'normal'}
+    rc('font', **font)
+    plt.rcParams.update({'font.size': 22})
+    
+    x = np.linspace(-5, 5, 100)
+    x = np.column_stack([np.ones_like(x), x, x**2, x**3])
+    
+    for j in range(1, x.shape[1]):
+        x[:, j] = (x[:, j] - means[j])/stds[j]
+    
+    y_pred = polinom_function(x, theta)
+    y_pred_init = polinom_function(x, theta_init)
+
+    plt.figure(figsize=(10,10))
+    plt.scatter(X_poly_scaled[:, 1], y_true)
+    plt.ylim(min(y_true)-1, max(y_true)+1)
+    plt.xlim(min(X_poly_scaled[:, 1]), max(X_poly_scaled[:, 1]))
+    plt.grid()
+
+    plt.plot(x[:,1], y_pred, color='r', label="Кривая после обучения")
+    plt.plot(x[:,1], y_pred_init, color='g', label="Кривая на начальных параметрах")
+    
+    plt.legend()
+    plt.show()
+    
+    
