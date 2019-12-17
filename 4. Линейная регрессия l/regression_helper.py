@@ -12,12 +12,7 @@ from ipywidgets import interact, IntSlider,  FloatSlider
 import math
 
         
-        
-font = {'family': 'Verdana', 'weight': 'normal'}
-rc('font', **font)
-
-
-    
+   
 X_LIM = 0.6
 Y_LIM = 10
 
@@ -39,7 +34,7 @@ def get_data():
 
 def create_base_plot():
     plt.rcParams.update({'font.size': 22})
-    plt.figure(figsize=(10, 5), dpi=300)
+    plt.figure(figsize=(10, 5), dpi=100)
     plt.xlabel("Доля свободного времени потраченного на учебу", fontsize=22)
     plt.ylabel("Средняя оценка", fontsize=22)
     plt.ylim([0, Y_LIM])
