@@ -34,7 +34,7 @@ def get_data():
 
 def create_base_plot():
     plt.rcParams.update({'font.size': 22})
-    plt.figure(figsize=(10, 5), dpi=100)
+    plt.figure(figsize=(8, 4), dpi=100)
     plt.xlabel("Доля свободного времени потраченного на учебу", fontsize=22)
     plt.ylabel("Средняя оценка", fontsize=22)
     plt.ylim([0, Y_LIM])
@@ -56,6 +56,26 @@ def plot_data_and_hyp(X, y, k):
     create_base_plot()
     length = len(X)
     plt.plot(np.linspace(0, 1, length), k*np.linspace(0, 1, length), label="k={0:.2f}".format(k), color='black')   
+    plt.scatter(X, y,  color='black', marker="o", s=50)  
+    plt.legend(loc="upper left")   
+    plt.show()
+    
+    
+def plot_several_linear_functions(X, y):    
+    create_base_plot()
+    length = len(X)
+    for k, color in zip([25, 10, 1], ['red', 'green', 'blue']):
+        plt.plot(np.linspace(0, 1, length), k*np.linspace(0, 1, length), label="k={0:.2f}".format(k), color=color)   
+    plt.scatter(X, y,  color='black', marker="o", s=50)  
+    plt.legend(loc="upper left")   
+    plt.show()
+    
+    
+def plot_several_good_linear_functions(X, y):    
+    create_base_plot()
+    length = len(X)
+    for k, color in zip([20, 23, 25], ['red', 'green', 'blue']):
+        plt.plot(np.linspace(0, 1, length), k*np.linspace(0, 1, length), label="k={0:.2f}".format(k), color=color)   
     plt.scatter(X, y,  color='black', marker="o", s=50)  
     plt.legend(loc="upper left")   
     plt.show()
@@ -87,6 +107,21 @@ def plot_data_and_error(X, y):
             
         plt.scatter(X, y,  color='black', marker="o", s=50)  
         plt.show()
+        
+        
+def plot_data_and_linear_function_with_error(X, y, k):    
+    create_base_plot()
+    length = len(X)
+    plt.plot(np.linspace(0, 1, length), k*np.linspace(0, 1, length), label="k={0}".format(k), color='black')   
+    plt.scatter(X, y,  color='black', marker="o", s=50)  
+    plt.scatter(X, k*X,  color='black', marker="x", s=50)  
+    plt.legend(loc="upper left") 
+
+    for x_i, y_i in zip(X, y):
+        plt.plot([x_i, x_i], [x_i * k, y_i], color='red')
+
+    plt.scatter(X, y,  color='black', marker="o", s=50)  
+    plt.show()
 
 def f(X, k):
     return k*X
@@ -147,6 +182,41 @@ def plot_data_and_loss(X, y, with_der=False):
         axis[1].tick_params(axis='both', which='minor', labelsize=20)
         axis[1].grid()
         plt.show()  
+        
+        
+def plot_data_and_function_with_error(X, y, k):    
+    fig, axis = plt.subplots(1, 2, figsize=(18, 6))
+
+    c = 'black'
+    length = len(X)
+
+    axis[0].plot(np.linspace(0, 0.6, length),  k*np.linspace(0, 0.6, length), label="k={0}".format(k), color=c)
+    axis[0].set_title("Полученная линейная функция")
+    for x_i, y_i in zip(X, y):
+        axis[0].plot([x_i, x_i], [x_i * k, y_i], color='red')
+    axis[0].scatter(X, y,  color='black', marker="o", s=50)  
+    axis[0].set_xlabel("Доля свободного времени потраченного на учебу")
+    axis[0].set_ylabel("Средняя оценка")
+    axis[0].set_xlim(0, X_LIM)
+    axis[0].set_ylim(0, Y_LIM)
+    axis[0].legend()    
+    axis[0].grid()
+
+    axis[1].set_title("Значение ошибки\nдля гипотезы", fontsize=24)
+    axis[1].set_ylabel("Значение функции потерь", fontsize=20)
+    axis[1].set_xlabel("Значение коэффициента $k$")
+
+    axis[1].scatter(k, J(X, y, k),  marker="+", label="$Loss({0})={1}$".format(k, round(J(X, y, k), 3)), s=50, color=c)
+    axis[1].set_xlim([-1, 41])
+    axis[1].set_ylim([0, 49])
+    axis[1].legend()    
+
+
+    # We change the fontsize of minor ticks label 
+    axis[1].tick_params(axis='both', which='major', labelsize=20)
+    axis[1].tick_params(axis='both', which='minor', labelsize=20)
+    axis[1].grid()
+    plt.show()  
     
     
 def plot_all_loss(X, y):
