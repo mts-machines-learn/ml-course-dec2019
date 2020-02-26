@@ -11,8 +11,7 @@ import matplotlib as mpl
 from ipywidgets import interact, IntSlider,  FloatSlider
 import math
 
-        
-   
+
 X_LIM = 0.6
 Y_LIM = 10
 
@@ -182,14 +181,15 @@ def plot_data_and_loss(X, y, with_der=False):
         axis[1].tick_params(axis='both', which='minor', labelsize=20)
         axis[1].grid()
         plt.show()  
+       
         
         
-def plot_data_and_function_with_error(X, y, k):    
+def linear_function_and_loss_with_derivation(X, y, k, with_der=True):    
     fig, axis = plt.subplots(1, 2, figsize=(18, 6))
-
+    
     c = 'black'
     length = len(X)
-
+    
     axis[0].plot(np.linspace(0, 0.6, length),  k*np.linspace(0, 0.6, length), label="k={0}".format(k), color=c)
     axis[0].set_title("Полученная линейная функция")
     for x_i, y_i in zip(X, y):
@@ -201,25 +201,32 @@ def plot_data_and_function_with_error(X, y, k):
     axis[0].set_ylim(0, Y_LIM)
     axis[0].legend()    
     axis[0].grid()
-
+    
     axis[1].set_title("Значение ошибки\nдля гипотезы", fontsize=24)
     axis[1].set_ylabel("Значение функции потерь", fontsize=20)
     axis[1].set_xlabel("Значение коэффициента $k$")
-
-    axis[1].scatter(k, J(X, y, k),  marker="+", label="$Loss({0})={1}$".format(k, round(J(X, y, k), 3)), s=50, color=c)
+    
+    axis[1].scatter(k, J(X, y, k),  marker="o", label="$Loss({0})={1}$".format(k, round(J(X, y, k), 3)), s=50, color=c)
+    if with_der: 
+        der_label= "$\dfrac{d Loss(" + str(k) + ")}{dk}$=" + str(round(der_J(X, y, k), 3))
+        axis[1].text(-1, 0, s=der_label, color=c, ha='left', va='bottom')
     axis[1].set_xlim([-1, 41])
-    axis[1].set_ylim([0, 49])
+    axis[1].set_ylim([0, 15])
     axis[1].legend()    
-
 
     # We change the fontsize of minor ticks label 
     axis[1].tick_params(axis='both', which='major', labelsize=20)
     axis[1].tick_params(axis='both', which='minor', labelsize=20)
     axis[1].grid()
     plt.show()  
+
+    
+def linear_function_and_loss(X, y, k): 
+    linear_function_and_loss_with_derivation(X, y, k, with_der=False)
+ 
     
     
-def plot_all_loss(X, y):
+def full_loss_function(X, y):
     plt.rcParams.update({'font.size': 22})
     plt.figure(figsize=(10, 5))
     plt.ylabel("Значение функции ошибки")
@@ -328,6 +335,91 @@ def derivation(x0):
         plt.plot([x1, x1], [y0, y1], color='black', linestyle='dashed')
 
         plt.show()
+        
+        
+def derivation_sample(x0, dx):
+    
+    plt.rcParams.update({'font.size': 18})
+    
+    def f(x):
+        return x**2 + 1.5
+
+    def der_f(x):
+        return 2*x
+    
+    fig, ax = plt.subplots(figsize=(8, 4), dpi=300)
+
+    plt.ylim([-1, 11])
+    plt.xlim([-4, 4])
+    plt.grid()
+    length = 100
+    x = np.linspace(-3.5, 3.5, length)
+
+    tg_alingment = 'left' if x0 > 0 else 'right'
+    tg_position = -4 if x0 > 0 else 4
+
+    x1 = x0+dx
+    y0 = f(x0)
+    y1 = f(x1)
+
+    begin = -11
+    end = 11
+    
+    
+    tg_value = (y1-y0)/(dx) if dx != 0 else der_f(x0)
+    tg_text = "$tg( \\alpha ) = \dfrac{\Delta y}{\Delta x} = $" + "{0:.2f}".format(tg_value) if x0 != 0 else \
+    "$tg( \\alpha ) = $" + "{0:.2f}".format(float(tg_value))
+
+    if x1 != x0:
+        k = (y1-y0)/(x1-x0)
+        b = y0 - k*x0
+        if x0 != 0:
+            plt.text( -b/k, -1, "$\\alpha$", ha='left', va='bottom')
+        plt.plot([begin, end], [k*begin + b, k*end + b], color='black', linestyle='dashed')
+        
+        vpos = 'top' if y1 > y0 else 'bottom'
+        hpos = 'left' if x1 > x0 else 'right'
+        if abs(x1 - x0) > 1.5 or abs(y1 - y0) > 1.5:
+            plt.text( x0 + (x1 - x0)/2, y0, "$\Delta x$", ha='center', va=vpos)
+            plt.text( x1, y0 + (y1 - y0)/2, "$\Delta y$", ha=hpos, va='center')
+    else:
+        plt.plot([begin, end], [der_f(x0)*(begin-x0) + f(x0), der_f(x0)*(end-x0) + f(x0)], 
+                 color='black', linestyle='dashed')
+        if x0 != 0:
+            plt.text((der_f(x0)*x0 - f(x0) )/ der_f(x0), -1, "$\\alpha$", ha='left', va='bottom')
+    
+    
+    if x1 >= x0:
+        plt.text(x1+0.1, -1, "$x_0 + \Delta x$", ha='left', va='bottom', fontsize=19)
+    else:
+        plt.text(x1+0.1, 0, "$x_0 + \Delta x$", ha='left', va='bottom', fontsize=19)
+        
+    if abs(y1-y0) < 0.7:
+        plt.text(-3.2, y1+0.1, "$f(x_0 + \Delta x)$", ha='left', va='top', fontsize=19)
+    else:
+        plt.text(-4, y1+0.1, "$f(x_0 + \Delta x)$", ha='left', va='top', fontsize=19)
+        
+    
+    plt.text(tg_position, -1, tg_text, 
+                 ha=tg_alingment, va='bottom')
+
+    plt.plot(x, f(x), color='black')   
+
+    plt.plot([-5, x0], [y0, y0], color='red', linestyle='dotted')
+    plt.plot([-5, x1], [y1, y1], color='blue', linestyle='dotted')
+    plt.plot([x0, x0], [-5, y0], color='red', linestyle='dotted')
+    plt.plot([x1, x1], [-5, y0], color='blue', linestyle='dotted')
+
+    plt.text(-4, y0-0.1, "$f(x_0)$", ha='left', va='top')
+    plt.text(x0-0.1, -1, "$x_0$", ha='right', va='bottom')
+
+    plt.scatter(x0, y0, color='red', marker="o", s=50) 
+    plt.scatter(x1, y1, color='blue', marker="o", s=50) 
+
+    plt.plot([x0, x1], [y0, y0], color='black', linestyle='dashed')
+    plt.plot([x1, x1], [y0, y1], color='black', linestyle='dashed')
+
+    plt.show()
 
         
 def plot_func_and_der(f, der_f, same=True):
@@ -382,6 +474,57 @@ def plot_simple_func_and_der(same=False):
         return 2*x
     
     plot_func_and_der(f, der_f, same=same)
+    
+    
+def function_and_derivation(x0):    
+    
+    plt.rcParams.update({'font.size': 18})
+    
+    def f(x):
+        return x**2 + 1.5
+    
+    def der_f(x):
+        return 2*x
+    
+    same=False
+    
+    fig, axis = plt.subplots(1, 2, figsize=(12, 4), dpi=300)
+
+    for ax in axis:
+        ax.set_xlim(-4, 4)
+        ax.grid()
+        
+    if same:
+        axis[0].set_ylim(-11, 11)
+    else:
+        axis[0].set_ylim(0, 11)
+    axis[1].set_ylim(-11, 11)
+        
+    length = 1000
+    x = np.linspace(-12, 12, length)
+    
+    axis[0].plot(x, f(x), color='black')
+    axis[1].plot(x, der_f(x), color='black')
+    
+    axis[0].scatter(x0, f(x0), color='black')
+    axis[1].scatter(x0, der_f(x0), color='black')
+    
+    axis[0].set_title("$f(x) = x^2 + 1.5$")
+    axis[1].set_title("$f'(x) = 2x$")
+    
+    axis[0].text(-4, -11 if same else 0, f"f({x0}) = {f(x0):.2}", ha='left', va='bottom')
+    axis[1].text(4, -11, f"f'({x0}) = {der_f(x0):.2}", ha='right', va='bottom')
+    
+    begin = -10
+    end = 20
+    if x0 != 0:
+        axis[0].plot([begin, end], [der_f(x0)*(begin-x0) + f(x0), der_f(x0)*(end-x0) + f(x0)], 
+                 color='black', linestyle='dashed')
+    else:
+        axis[0].plot([begin, end], [f(0), f(0)], 
+                 color='black', linestyle='dashed')
+
+    plt.show() 
 
 
 def der_J(X, y, k):
@@ -398,15 +541,14 @@ def plot_loss_and_der(X, y, same=True, der_value=False):
     
     @interact(k0=k_slider)
     def plot_data_and_hyp_with_error(k0):    
+        plt.rcParams.update({'font.size': 22})
+        
         fig, axis = plt.subplots(1, 2, figsize=(18, 6), dpi=300)
     
         for ax in axis:
             ax.set_xlim(0, 40)
             ax.grid()
             
-        
-        
-        #axis[1].set_ylim(-1, 1)
             
         length = 1000
         begin = 0
@@ -444,6 +586,59 @@ def plot_loss_and_der(X, y, same=True, der_value=False):
                      color='black', linestyle='dashed')
         plt.tight_layout()
         plt.show()    
+
+        
+        
+        
+def loss_function_and_with_derivation(X, y, k0):    
+    
+    plt.rcParams.update({'font.size': 16})
+    same=True
+    der_value=True
+    fig, axis = plt.subplots(1, 2, figsize=(12, 4), dpi=300)
+    
+    for ax in axis:
+        ax.set_xlim(0, 40)
+        ax.grid()
+        
+        
+    length = 1000
+    begin = 0
+    end = 40
+    ks = np.linspace(begin, end, length)
+    
+    errors = [J(X, y, k) for k in ks]
+    axis[0].plot(ks, errors, color='black')
+    axis[1].plot(ks, [der_J(X, y, k) for k in ks], color='black')
+    
+    axis[0].scatter(k0, J(X, y, k0), color='black')
+    axis[1].scatter(k0, der_J(X, y, k0), color='black')
+    
+    axis[0].set_title("$\dfrac{1}{N} \sum_{i=1}^{N} (kX_i - y_i)^2$")
+    
+    if not der_value:
+        axis[1].set_title("$\dfrac{2}{N} \sum_{i=1}^{N} (kX_i - y_i)X_i$")
+    else:
+        axis[1].set_title("$\dfrac{2}{N} \sum_{i=1}^{N} (kX_i - y_i)X_i=$" + "{0:.2f}".format(der_J(X, y, k0)))
+    
+    axis[0].set_xlabel("Значение параметра $k$")
+    axis[0].set_ylabel("Значение функции ошибки")
+    
+    axis[1].set_xlabel("Значение параметра $k$")
+    axis[1].set_ylabel("Значение производной\nфункции ошибки")
+    
+    
+    axis[0].set_ylim(min(errors) - 5, max(errors))
+    
+    if k0 != 0:
+        axis[0].plot([begin, end], [der_J(X, y, k0)*(begin-k0) + J(X, y, k0), der_J(X, y, k0)*(end-k0) + J(X, y, k0)], 
+                 color='black', linestyle='dashed')
+    else:
+        axis[0].plot([begin, end], [J(X, y, k0), J(X, y, k0)], 
+                 color='black', linestyle='dashed')
+    plt.tight_layout()
+    plt.show()    
+        
 
 def interactive_gradient_descent(X, y, iters=10):
     k_init = FloatSlider(min=0, max=15, step=1, value=1, description='$k$ init:')
