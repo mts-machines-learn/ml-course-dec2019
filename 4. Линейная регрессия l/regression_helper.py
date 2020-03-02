@@ -694,6 +694,57 @@ def interactive_gradient_descent(X, y, iters=10):
         axis[0].text(-0.5, 0, s="$k$="+f"{k:.4}", va='bottom', ha='left')
         plt.show()        
 
+        
+        
+def gradient_descent_visualization(X, y, k_init, a, it):    
+    fig, axis = plt.subplots(1, 2, figsize=(18, 6), dpi=300)
+    
+    for ax in axis:
+        ax.grid()
+        
+    axis[0].set_title("Значение ошибки")
+    axis[0].set_ylabel("Значение функции потерь")
+    axis[0].set_xlabel("Значение коэффициента")
+    
+    begin = 0
+    end = 40
+    
+    T = np.linspace(begin, end, 100)
+    errors = [J(X, y, t) for t in T]
+    axis[0].set_ylim(min(errors), max(errors))
+    
+    axis[0].plot(T, errors, color='black')
+    axis[0].scatter(k_init, J(X, y, k_init), color='green', marker="o", label="Начальная значение $k$")
+    k = float(k_init)
+    for i in range(it):
+        tmp_k = k
+        k = k - a * der_J(X, y, k)
+        axis[0].plot([tmp_k, k], [J(X, y, tmp_k), J(X, y, k)], color='black', linestyle='dashed')
+        if it > 1:
+            if i == 0:
+                axis[0].scatter(k, J(X, y, k), color='gray', marker="o", label="Промежуточные значения $k$")
+            else:
+                axis[0].scatter(k, J(X, y, k), color='gray', marker="o")
+            
+    length = len(X)
+    axis[1].plot(np.linspace(0, 1, length), k*np.linspace(0, 1, length), label="k={0:.3f}".format(k), color='black')   
+    axis[1].scatter(X, y,  color='black', marker="o", s=50)         
+    axis[1].legend(loc="upper left")  
+    
+    
+    if it > 0: axis[0].scatter(k, J(X, y, k), color='red', marker="o", label="Конечное значение $k$")
+    axis[0].set_ylim(min(errors), max(errors))
+    axis[0].set_xlim([begin, end])
+    #
+    axis[1].set_xlim([0, 0.6])
+    axis[1].set_ylim([0, 10])
+    axis[1].set_title("J({0:.3f}) = {1:.4f}".format(k, J(X, y, k)))
+    
+    axis[0].legend(loc='best')
+    axis[0].text(-0.5, 0, s="$k$="+f"{k:.4}", va='bottom', ha='left')
+    plt.show() 
+    
+    
 # ***********************************************************************************************************************
 
 def plot_data_and_hyp_with_bias(X, y, k, b):    
