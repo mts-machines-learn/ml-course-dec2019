@@ -70,6 +70,21 @@ def plot_several_linear_functions(X, y):
     plt.show()
     
     
+def plot_several_linear_functions_with_bais(ks, bs):    
+    plt.rcParams.update({'font.size': 22})
+    plt.figure(figsize=(8, 4), dpi=100)
+    plt.xlabel("$X$", fontsize=22)
+    plt.ylabel("$y$", fontsize=22)
+    plt.ylim([0, Y_LIM])
+    plt.xlim([0, X_LIM]) 
+    plt.grid()
+    length = 3
+    for k, b, color in zip(ks, bs, ['red', 'green', 'blue']):
+        plt.plot(np.linspace(0, 1, length), k*np.linspace(0, 1, length) + b, label="k={0:.2f}, b={1:.2f}".format(k, b), color=color)    
+    plt.legend(loc="upper left")   
+    plt.show() 
+    
+    
 def plot_several_good_linear_functions(X, y):    
     create_base_plot()
     length = len(X)
@@ -797,9 +812,31 @@ def plot_func_in_3d():
         ax.view_init(angle1, angle2)
         plt.show()
         
+def plot_function_in_3d(angle1, angle2):
+    fig = plt.figure(figsize=(8, 8))
+    ax = fig.gca(projection='3d')
+
+    # Make data.
+    x = np.linspace(-10, 10, 100)
+    y = np.linspace(-10, 10, 100)
+    x, y = np.meshgrid(x, y)
+
+    Z = np.zeros_like(x)
+    for i in range(len(x)):
+        for j in range(len(y)):
+            Z[i, j] = f_3d(x[i, j], y[i, j])
+
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.set_zlabel('$\phi(x, y)$')
+
+    surf = ax.plot_surface(x, y, Z,   linewidth=0, antialiased=False, cmap=cm.coolwarm)
+    ax.view_init(angle1, angle2)
+    plt.show()
+        
 def plot_3d_func_with_grad(x0=0, y0=0, pos_neg_grad=None):    
 
-    fig = plt.figure(figsize=(12, 12))
+    fig = plt.figure(figsize=(9, 9))
 
 
     if pos_neg_grad is not None:
@@ -813,9 +850,9 @@ def plot_3d_func_with_grad(x0=0, y0=0, pos_neg_grad=None):
 
         # left text with point and derivative
         plt.text(-10, 9.5, "$x_0 = " + "{0} $".format(x0), ha='left', va="center")
-        plt.text(-10, 9, "$y_0 = " + "{0} $".format(y0), ha='left', va="center")
-        plt.text(-10, 8, "$\dfrac{\delta \phi(x, y)}{\delta x} = 4.5x + 7.5 = " + "{0} $".format(grad[0]), ha='left', va="center")
-        plt.text(-10, 6.5, "$\dfrac{\delta \phi(x, y)}{\delta y} = 5y = " + "{0} $".format(grad[1]), ha='left', va="center")
+        plt.text(-10, 8, "$y_0 = " + "{0} $".format(y0), ha='left', va="center")
+        plt.text(-10, -6.5, "$\dfrac{\delta \phi(x, y)}{\delta x} = 4.5x + 7.5 = " + "{0} $".format(grad[0]), ha='left', va="center")
+        plt.text(-10, -9, "$\dfrac{\delta \phi(x, y)}{\delta y} = 5y = " + "{0} $".format(grad[1]), ha='left', va="center")
         
         
         col = 'gray'
@@ -870,6 +907,7 @@ def plot_3d_func_with_grad(x0=0, y0=0, pos_neg_grad=None):
     plt.contour(x, y, Z, lines[ind], cmap=cm.coolwarm)  # нарисовать указанные линии уровня
     plt.grid()
     plt.show()
+
 
 
 def plot_3d_func_with_grad_interactive():    
@@ -997,7 +1035,34 @@ def plot_linear_loss_in_3d(X, y):
         #ax.set_ylim([-1, 1])
         
         plt.show()
+        
+        
+def plot_loss_with_bias(X, y, angle1, angle2):
+    fig = plt.figure(figsize=(15, 10))
+    ax = fig.gca(projection='3d')
 
+    k_min = 5
+    k_max = 25
+
+    b_min = -5
+    b_max = 10
+
+    ks = np.linspace(k_min, k_max, 40)
+    bs = np.linspace(b_min, b_max, 40)
+    ks, bs = np.meshgrid(ks, bs)
+
+    Z = np.zeros_like(ks)
+    for i in range(len(ks)):
+        for j in range(len(bs)):
+            Z[i, j] = linearn_loss_function(X, y, ks[i, j], bs[i, j])
+
+    ax.set_xlabel('Значение параметра $k$', labelpad=20)
+    ax.set_ylabel('Значение параметра $b$', labelpad=20)
+    ax.set_zlabel('Функция ошибки', labelpad=20)
+    
+    surf = ax.plot_surface(ks, bs, Z,   linewidth=0, antialiased=False, cmap=cm.coolwarm)
+    ax.view_init(angle1, angle2)
+    plt.show()
 
 def plot_linear_loss_in_3d_up(X, y):    
     
@@ -1039,7 +1104,7 @@ def gradient_function(X, y, k, b):
 
 def plot_gradient_descent_in_3d(X, y, iters=5, alpha=0.15):    
     
-    plt.figure(figsize=(10, 10))
+    plt.figure(figsize=(8, 8))
 
 
     k = 0
@@ -1098,7 +1163,7 @@ def plot_gradient_descent_in_3d(X, y, iters=5, alpha=0.15):
 
 
     
-def plot_gradient_descent_in_3d_interactive(X, y, iters=5, alpha = 0.15):    
+def plot_gradient_descent_in_3d_interactive(X, y, iters=5, alpha=0.15):    
 
     i_slider = IntSlider(min=-1, max=iters, step=1, value=-1, description='iter')
 
